@@ -1,4 +1,4 @@
-name := """mailximp2"""
+name := """mailximp"""
 
 version := "0.1.0-SNAPSHOT"
 

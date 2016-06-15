@@ -1,5 +1,5 @@
 // The Play plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.4")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.3")
 
 // Web plugins
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
@@ -19,3 +19,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-play-enhancer" % "1.1.0")
 // Play Ebean support, to enable, uncomment this line, and enable in your build.sbt using
 // enablePlugins(PlayEbean).
 // addSbtPlugin("com.typesafe.sbt" % "sbt-play-ebean" % "1.0.0")
+
+// Uncomment the below line to view dependencyGraph
+// Url - https://github.com/jrudolph/sbt-dependency-graph
+// addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
