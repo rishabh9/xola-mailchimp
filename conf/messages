@@ -1,0 +1,5 @@
+unauthorised.not.allowed            = You are not authorised to perform this operation
+conflict.already.exists             = Plugin with same name exists
+unexpected.error                    = We had a problem with our server. Try again later
+resource.not.found                  = Resource not found
+validation.invalid.id               = Invalid id
