@@ -7,111 +7,49 @@ import java.util.Objects;
  */
 public class Confirmation extends BaseModel {
 
-    private String installationId;
-    private String pluginId;
-    private Seller seller;
+    private String uid;
+    private String ts;
 
-    public String getInstallationId() {
-        return installationId;
+    public Confirmation(String uid, String ts) {
+        this.uid = uid;
+        this.ts = ts;
     }
 
-    public void setInstallationId(String installationId) {
-        this.installationId = installationId;
+    public String getUid() {
+        return uid;
     }
 
-    public String getPluginId() {
-        return pluginId;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
-    public void setPluginId(String pluginId) {
-        this.pluginId = pluginId;
+    public String getTs() {
+        return ts;
     }
 
-    public Seller getSeller() {
-        return seller;
-    }
-
-    public void setSeller(Seller seller) {
-        this.seller = seller;
+    public void setTs(String ts) {
+        this.ts = ts;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Confirmation confirmation = (Confirmation) o;
-        return Objects.equals(installationId, confirmation.installationId) &&
-                Objects.equals(pluginId, confirmation.pluginId) &&
-                Objects.equals(seller, confirmation.seller);
+        Confirmation that = (Confirmation) o;
+        return Objects.equals(uid, that.uid) &&
+                Objects.equals(ts, that.ts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installationId, pluginId, seller);
+        return Objects.hash(uid, ts);
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Confirmation{");
-        sb.append("installationId='").append(installationId).append('\'');
-        sb.append(", pluginId='").append(pluginId).append('\'');
-        sb.append(", seller=").append(seller);
-        sb.append('}');
-        return sb.toString();
-    }
-}
-
-class Seller {
-
-    private String id;
-    private String name;
-    private String email;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Seller seller = (Seller) o;
-        return Objects.equals(id, seller.id) &&
-                Objects.equals(name, seller.name) &&
-                Objects.equals(email, seller.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, email);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Seller{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", email='").append(email).append('\'');
+        final StringBuilder sb = new StringBuilder("Confirmation-{");
+        sb.append("uid='").append(uid).append('\'');
+        sb.append(", ts='").append(ts).append('\'');
         sb.append('}');
         return sb.toString();
     }
