@@ -1,15 +1,15 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.WriteResult;
 import controllers.helpers.MailChimpAuthorizeCall;
 import daos.ConfirmationDao;
 import models.Confirmation;
-import org.springframework.util.StringUtils;
 import play.Logger;
-import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
+import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -28,30 +28,30 @@ public class ConfirmationController extends Controller {
     private final ConfirmationDao confirmationDao;
     private final MessagesApi messagesApi;
     private final MailChimpAuthorizeCall authorizeCall;
-    private final FormFactory formFactory;
 
     @Inject
     public ConfirmationController(final ConfirmationDao confirmationDao, final MessagesApi messagesApi,
-                                  final MailChimpAuthorizeCall authorizeCall, final FormFactory formFactory) {
+                                  final MailChimpAuthorizeCall authorizeCall) {
         super();
         this.confirmationDao = confirmationDao;
         this.messagesApi = messagesApi;
         this.authorizeCall = authorizeCall;
-        this.formFactory = formFactory;
     }
 
-    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
+    @BodyParser.Of(BodyParser.Json.class)
     public Result confirm() {
-        final DynamicForm requestData = formFactory.form().bindFromRequest();
-        final String uid = requestData.get("uid");
-        final String timestamp = requestData.get("ts");
-        if (!StringUtils.hasText(uid) || !StringUtils.hasText(timestamp)) {
-            log.error("Error in parsing the confirmation data! Received: {} & {}", uid, timestamp);
+        JsonNode json = request().body().asJson();
+        Confirmation data;
+        try {
+            data = Json.fromJson(json, Confirmation.class);
+            log.debug("Received confirmation: {}", data.toString());
+        } catch (Exception e) {
+            log.error("Error in parsing the confirmation data!", e);
+            log.error("Received the following data: {}", json.toString());
             return badRequest();
         }
-        log.debug("Received installation confirmation from Xola: UID: {}, TS: {}", uid, timestamp);
 
-        final WriteResult result = confirmationDao.insert(new Confirmation(uid, timestamp));
+        WriteResult result = confirmationDao.insert(data);
         if (result.wasAcknowledged()) {
             final String upsertedId = result.getUpsertedId().toString();
             log.info("Confirmation {} created", upsertedId);
