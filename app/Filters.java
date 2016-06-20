@@ -1,15 +1,16 @@
 import javax.inject.*;
+
 import play.*;
+import play.filters.cors.CORSFilter;
 import play.mvc.EssentialFilter;
 import play.http.HttpFilters;
-import play.mvc.*;
 
 import filters.ExampleFilter;
 
 /**
  * This class configures filters that run on every request. This
  * class is queried by Play to get a list of filters.
- *
+ * <p>
  * Play will automatically use filters from any class called
  * <code>Filters</code> that is placed the root package. You can load filters
  * from a different class by adding a `play.http.filters` setting to
@@ -20,27 +21,30 @@ public class Filters implements HttpFilters {
 
     private final Environment env;
     private final EssentialFilter exampleFilter;
+    private final CORSFilter corsFilter;
 
     /**
-     * @param env Basic environment settings for the current application.
+     * @param env           Basic environment settings for the current application.
      * @param exampleFilter A demonstration filter that adds a header to
+     * @param corsFilter
      */
     @Inject
-    public Filters(Environment env, ExampleFilter exampleFilter) {
+    public Filters(Environment env, ExampleFilter exampleFilter, CORSFilter corsFilter) {
         this.env = env;
         this.exampleFilter = exampleFilter;
+        this.corsFilter = corsFilter;
     }
 
     @Override
     public EssentialFilter[] filters() {
-      // Use the example filter if we're running development mode. If
-      // we're running in production or test mode then don't use any
-      // filters at all.
-      if (env.mode().equals(Mode.DEV)) {
-          return new EssentialFilter[] { exampleFilter };
-      } else {
-         return new EssentialFilter[] {};
-      }
+        // Use the example filter if we're running development mode. If
+        // we're running in production or test mode then don't use any
+        // filters at all.
+        if (env.mode().equals(Mode.DEV)) {
+            return new EssentialFilter[]{exampleFilter, corsFilter.asJava()};
+        } else {
+            return new EssentialFilter[]{corsFilter.asJava()};
+        }
     }
 
 }
