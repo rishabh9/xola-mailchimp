@@ -25,7 +25,7 @@
   </appender>
 
   <logger name="play" level="INFO" />
-  <logger name="application" level="DEBUG" />
+  <logger name="application" level="INFO" />
   <!-- TODO: Set it back to INFO before going to production -->
   <logger name="controllers" level="DEBUG" />
   <logger name="daos" level="DEBUG" />

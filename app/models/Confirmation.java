@@ -9,6 +9,9 @@ public class Confirmation extends BaseModel {
 
     private String pluginId;
     private Seller seller;
+    private String oauthCode;
+    private String accessToken;
+    private Metadata metadata;
 
     public String getPluginId() {
         return pluginId;
@@ -26,18 +29,45 @@ public class Confirmation extends BaseModel {
         this.seller = seller;
     }
 
+    public String getOauthCode() {
+        return oauthCode;
+    }
+
+    public void setOauthCode(String oauthCode) {
+        this.oauthCode = oauthCode;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Confirmation that = (Confirmation) o;
         return Objects.equals(pluginId, that.pluginId) &&
-                Objects.equals(seller, that.seller);
+                Objects.equals(seller, that.seller) &&
+                Objects.equals(oauthCode, that.oauthCode) &&
+                Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(metadata, that.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pluginId, seller);
+        return Objects.hash(pluginId, seller, oauthCode, accessToken, metadata);
     }
 
     @Override
@@ -45,73 +75,9 @@ public class Confirmation extends BaseModel {
         final StringBuilder sb = new StringBuilder("Confirmation{");
         sb.append("pluginId='").append(pluginId).append('\'');
         sb.append(", seller=").append(seller);
-        sb.append('}');
-        return sb.toString();
-    }
-}
-
-class Seller {
-
-    private String id;
-    private String name;
-    private String email;
-    private String company;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Seller seller = (Seller) o;
-        return Objects.equals(id, seller.id) &&
-                Objects.equals(name, seller.name) &&
-                Objects.equals(email, seller.email) &&
-                Objects.equals(company, seller.company);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, email, company);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Seller{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", company='").append(company).append('\'');
+        sb.append(", oauthCode='").append(oauthCode).append('\'');
+        sb.append(", accessToken='").append(accessToken).append('\'');
+        sb.append(", metadata=").append(metadata);
         sb.append('}');
         return sb.toString();
     }
