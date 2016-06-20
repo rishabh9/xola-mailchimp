@@ -6,7 +6,6 @@ import controllers.helpers.MailChimpAuthorizeCall;
 import daos.ConfirmationDao;
 import models.Confirmation;
 import play.Logger;
-import play.data.FormFactory;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.libs.Json;
@@ -21,17 +20,17 @@ import static utils.MessageKey.UNEXPECTED_ERROR;
 /**
  * @author rishabh
  */
-public class ConfirmationController extends Controller {
+public class SetupController extends Controller {
 
-    private final Logger.ALogger log = Logger.of(ConfirmationController.class);
+    private final Logger.ALogger log = Logger.of(SetupController.class);
 
     private final ConfirmationDao confirmationDao;
     private final MessagesApi messagesApi;
     private final MailChimpAuthorizeCall authorizeCall;
 
     @Inject
-    public ConfirmationController(final ConfirmationDao confirmationDao, final MessagesApi messagesApi,
-                                  final MailChimpAuthorizeCall authorizeCall) {
+    public SetupController(final ConfirmationDao confirmationDao, final MessagesApi messagesApi,
+                           final MailChimpAuthorizeCall authorizeCall) {
         super();
         this.confirmationDao = confirmationDao;
         this.messagesApi = messagesApi;
@@ -39,7 +38,7 @@ public class ConfirmationController extends Controller {
     }
 
     @BodyParser.Of(BodyParser.Json.class)
-    public Result confirm() {
+    public Result setup() {
         JsonNode json = request().body().asJson();
         Confirmation data;
         try {
