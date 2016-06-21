@@ -11,10 +11,12 @@ import play.Logger;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.libs.ws.WSClient;
+import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author rishabh
@@ -55,8 +57,10 @@ public class SaveController extends Controller {
         confirmation.setList(list);
         WriteResult result = confirmationDao.insert(confirmation);
         if (result.wasAcknowledged()) {
-            flash("confirm", confirmation.getId().toString());
-            return redirect(controllers.routes.ListController.index());
+            log.info("Plugin is setup successfully for confirmation {}", confirmationId);
+            // TODO: Call the Xola App Store for installation confirmation.
+            CompletionStage<WSResponse> response = ws.url("").setHeader("","").post("");
+            return redirect(controllers.routes.FinalController.index());
         } else {
             log.error("Error while updating the selected mailing list to db.");
             return internalServerError("Error saving the selection.");
