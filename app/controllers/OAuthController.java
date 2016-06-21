@@ -111,7 +111,7 @@ public class OAuthController extends Controller {
                             log.debug("Saving metadata for confirmation {}", confirmId);
                             updateConfirmation(confirmation);
                             log.debug("Redirect to available lists page...");
-                            return redirect("/lists?confirm="+confirmId);
+                            return redirect("/lists?confirm=" + confirmId);
                         }
                     } else {
                         return internalServerError();

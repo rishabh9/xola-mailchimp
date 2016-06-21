@@ -43,8 +43,11 @@ public class ListController extends Controller {
     public CompletionStage<Result> index() {
         DynamicForm requestData = formFactory.form().bindFromRequest();
         String confirmationId = requestData.get("confirm");
+        if (!StringUtils.hasText(confirmationId)) {
+            confirmationId = flash("confirm");
+        }
         if (StringUtils.hasText(confirmationId)) {
-            log.debug("Retrieving mailing lists for confirmation {}", confirmationId);
+            log.info("Retrieving mailing lists for confirmation {}", confirmationId);
             Confirmation confirmation = confirmationDao.get(new ObjectId(confirmationId));
             WSRequest request = ws.url(confirmation.getMetadata().getApiEndpoint() + "/3.0/lists")
                     .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
@@ -81,10 +84,10 @@ public class ListController extends Controller {
                 selectedId = confirmation.getList().getId();
             }
             log.debug("Rendering view with {} items in list and selected item is '{}'", arr.size(), selectedId);
-            return ok(views.html.lists.render(lists, selectedId));
+            return ok(views.html.lists.render(lists, selectedId, confirmation.getId().toString()));
         } else {
             log.debug("Received empty mailing list for confirmation {}", confirmation.getId().toString());
-            return ok(views.html.lists.render(lists, ""));
+            return ok(views.html.lists.render(lists, "", confirmation.getId().toString()));
         }
     }
 }

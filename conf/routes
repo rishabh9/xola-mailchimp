@@ -16,3 +16,4 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 POST    /oauth/setup        controllers.SetupController.setup()
 GET     /oauth/complete     controllers.OAuthController.complete()
 GET     /lists              controllers.ListController.index()
+POST    /save               controllers.SaveController.index()
