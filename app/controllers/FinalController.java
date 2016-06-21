@@ -8,7 +8,7 @@ import play.mvc.Result;
  */
 public class FinalController extends Controller {
 
-    public Result index() {
-        return ok(views.html.last.render());
+    public Result index(String message) {
+        return ok(views.html.last.render(message));
     }
 }

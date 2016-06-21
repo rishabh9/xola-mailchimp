@@ -1,3 +1,8 @@
+@(message: String)
 @main(title = "Approval Listing") {
-You have successfully configured the plugin.
+    @if("success".equalsIgnoreCase(message)) {
+        You have successfully configured the plugin.
+    } else {
+        There was an error while seting up the plugin. Please try again.
+    }
 }

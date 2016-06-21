@@ -4,18 +4,18 @@ import com.mongodb.WriteResult;
 import daos.ConfirmationDao;
 import models.Confirmation;
 import models.MailingList;
-import models.Metadata;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSResponse;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -36,7 +36,7 @@ public class SaveController extends Controller {
         this.confirmationDao = confirmationDao;
     }
 
-    public Result index() {
+    public CompletionStage<Result> index() {
         log.info("Saving the selected mailing list...");
         DynamicForm requestData = formFactory.form().bindFromRequest();
         String id = requestData.get("id");
@@ -45,7 +45,7 @@ public class SaveController extends Controller {
         log.debug("Received id: {}, name: {}, confirmationId: {}", id, name, confirmationId);
         if (!StringUtils.hasText(confirmationId)) {
             log.error("Invalid system state. Invalid confirmation id received: '{}'", confirmationId);
-            return badRequest("Invalid system state.");
+            return CompletableFuture.completedFuture(badRequest("Invalid system state."));
         }
         Confirmation confirmation = confirmationDao.get(new ObjectId(confirmationId));
         MailingList list = confirmation.getList();
@@ -58,12 +58,23 @@ public class SaveController extends Controller {
         WriteResult result = confirmationDao.insert(confirmation);
         if (result.wasAcknowledged()) {
             log.info("Plugin is setup successfully for confirmation {}", confirmationId);
-            // TODO: Call the Xola App Store for installation confirmation.
-            CompletionStage<WSResponse> response = ws.url("").setHeader("","").post("");
-            return redirect(controllers.routes.FinalController.index());
+            return CompletableFuture.supplyAsync(this::confirmInstallationWithXola)
+                    .thenApply((Integer status) -> {
+                        if (status == Http.Status.CREATED || status == Http.Status.OK) {
+                            return redirect(controllers.routes.FinalController.index("success"));
+                        } else {
+                            return redirect(controllers.routes.FinalController.index("error"));
+                        }
+                    });
         } else {
             log.error("Error while updating the selected mailing list to db.");
-            return internalServerError("Error saving the selection.");
+            return CompletableFuture.completedFuture(internalServerError("Error saving the selection."));
         }
+    }
+
+    private Integer confirmInstallationWithXola() {
+        // TODO: Call the Xola App Store for installation confirmation.
+        //CompletionStage<WSResponse> response = ws.url("").setHeader("","").post("");
+        return Http.Status.INTERNAL_SERVER_ERROR;
     }
 }
