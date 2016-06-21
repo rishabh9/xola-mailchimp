@@ -12,6 +12,7 @@ public class Confirmation extends BaseModel {
     private String oauthCode;
     private String accessToken;
     private Metadata metadata;
+    private MailingList list;
 
     public String getPluginId() {
         return pluginId;
@@ -53,6 +54,14 @@ public class Confirmation extends BaseModel {
         this.metadata = metadata;
     }
 
+    public MailingList getList() {
+        return list;
+    }
+
+    public void setList(MailingList list) {
+        this.list = list;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,12 +71,13 @@ public class Confirmation extends BaseModel {
                 Objects.equals(seller, that.seller) &&
                 Objects.equals(oauthCode, that.oauthCode) &&
                 Objects.equals(accessToken, that.accessToken) &&
-                Objects.equals(metadata, that.metadata);
+                Objects.equals(metadata, that.metadata) &&
+                Objects.equals(list, that.list);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pluginId, seller, oauthCode, accessToken, metadata);
+        return Objects.hash(pluginId, seller, oauthCode, accessToken, metadata, list);
     }
 
     @Override
@@ -78,6 +88,7 @@ public class Confirmation extends BaseModel {
         sb.append(", oauthCode='").append(oauthCode).append('\'');
         sb.append(", accessToken='").append(accessToken).append('\'');
         sb.append(", metadata=").append(metadata);
+        sb.append(", list=").append(list);
         sb.append('}');
         return sb.toString();
     }

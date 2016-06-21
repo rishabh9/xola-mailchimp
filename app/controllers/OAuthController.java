@@ -15,6 +15,7 @@ import play.inject.ConfigurationProvider;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -90,8 +91,8 @@ public class OAuthController extends Controller {
                         saveAccessToken(confirmation, confirmId, access_token);
                         log.debug("Retrieving metadata for confirmation {}", confirmId);
                         return ws.url(configuration.getString(MAILCHIMP_METADATA_URL))
-                                .setHeader("Accept", "application/json")
-                                .setHeader("Authorization", "Bearer " + access_token)
+                                .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
+                                .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + access_token)
                                 .get();
                     }
                 })
@@ -110,7 +111,7 @@ public class OAuthController extends Controller {
                             log.debug("Saving metadata for confirmation {}", confirmId);
                             updateConfirmation(confirmation);
                             log.debug("Redirect to available lists page...");
-                            return redirect("/list");
+                            return redirect("/lists?confirm="+confirmId);
                         }
                     } else {
                         return internalServerError();

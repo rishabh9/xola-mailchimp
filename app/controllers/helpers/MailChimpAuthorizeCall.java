@@ -38,7 +38,6 @@ public class MailChimpAuthorizeCall extends Call {
         url.append('&').append("redirect_uri=").append(configuration.getString(REDIRECT_URI));
         url.append('?').append("confirm=").append(id);
         return url.toString();
-//https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id=889667269727&redirect_uri=http://isengard.local:9000/complete?confirm=5767b4d9fa7ac9205a8360e5
     }
 
     @Override
