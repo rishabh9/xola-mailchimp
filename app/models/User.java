@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * @author rishabh
  */
-public class Seller {
+public class User {
 
     private String id;
     private String name;
@@ -48,11 +48,11 @@ public class Seller {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Seller seller = (Seller) o;
-        return Objects.equals(id, seller.id) &&
-                Objects.equals(name, seller.name) &&
-                Objects.equals(email, seller.email) &&
-                Objects.equals(company, seller.company);
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(company, user.company);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class Seller {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Seller{");
+        final StringBuilder sb = new StringBuilder("User{");
         sb.append("id='").append(id).append('\'');
         sb.append(", name='").append(name).append('\'');
         sb.append(", email='").append(email).append('\'');

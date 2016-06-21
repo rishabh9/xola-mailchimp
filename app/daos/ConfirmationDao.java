@@ -10,4 +10,6 @@ import org.bson.types.ObjectId;
  */
 @ImplementedBy(ConfirmationDaoImpl.class)
 public interface ConfirmationDao extends GenericDao<Confirmation, ObjectId> {
+
+    Confirmation getByUserId(String userId);
 }

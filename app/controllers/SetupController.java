@@ -5,6 +5,7 @@ import com.mongodb.WriteResult;
 import controllers.helpers.MailChimpAuthorizeCall;
 import daos.ConfirmationDao;
 import models.Confirmation;
+import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
@@ -22,6 +23,7 @@ import static utils.MessageKey.UNEXPECTED_ERROR;
  */
 public class SetupController extends Controller {
 
+    private static final String INVALID_JSON = "Invalid Json.";
     private final Logger.ALogger log = Logger.of(SetupController.class);
 
     private final ConfirmationDao confirmationDao;
@@ -40,17 +42,31 @@ public class SetupController extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public Result setup() {
         JsonNode json = request().body().asJson();
-        Confirmation data;
+        Confirmation newData;
         try {
-            data = Json.fromJson(json, Confirmation.class);
-            log.debug("Received confirmation: {}", data.toString());
+            newData = Json.fromJson(json, Confirmation.class);
+            log.debug("Received confirmation: {}", newData.toString());
         } catch (Exception e) {
             log.error("Error in parsing the confirmation data!", e);
             log.error("Received the following data: {}", json.toString());
-            return badRequest();
+            return badRequest(INVALID_JSON);
         }
 
-        WriteResult result = confirmationDao.insert(data);
+        if (isInvalid(newData)) {
+            return badRequest(INVALID_JSON);
+        }
+
+        String userId = newData.getUser().getId();
+        Confirmation oldData = confirmationDao.getByUserId(userId);
+        if (null != oldData) {
+            log.debug("Found an existing entry for user {}", userId);
+            copyOverData(newData, oldData);
+        } else {
+            log.debug("Brand new user {}!", userId);
+            oldData = newData;
+        }
+
+        WriteResult result = confirmationDao.insert(oldData);
         if (result.wasAcknowledged()) {
             final String upsertedId = result.getUpsertedId().toString();
             log.info("Confirmation {} created", upsertedId);
@@ -59,6 +75,27 @@ public class SetupController extends Controller {
         } else {
             log.error("Error while persisting confirmation. {}", result.toString());
             return internalServerError(getMsg().at(UNEXPECTED_ERROR));
+        }
+    }
+
+    private boolean isInvalid(Confirmation newData) {
+        if (!StringUtils.hasText(newData.getPluginId()))
+            return true;
+        if (null == newData.getUser())
+            return true;
+        if (!StringUtils.hasText(newData.getUser().getId()))
+            return true;
+        return false;
+    }
+
+    private void copyOverData(Confirmation source, Confirmation destination) {
+        destination.setPluginId(source.getPluginId());
+        if (null != destination.getUser()) {
+            destination.getUser().setName(source.getUser().getName());
+            destination.getUser().setCompany(source.getUser().getCompany());
+            destination.getUser().setEmail(source.getUser().getEmail());
+        } else {
+            destination.setUser(source.getUser());
         }
     }
 

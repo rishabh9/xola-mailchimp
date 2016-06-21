@@ -65,4 +65,11 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     public WriteResult delete(ObjectId id) {
         return confirmations().remove(id);
     }
+
+    @Override
+    public Confirmation getByUserId(String userId) {
+        return confirmations()
+                .findOne("{user: {id: #}}", userId)
+                .as(Confirmation.class);
+    }
 }
