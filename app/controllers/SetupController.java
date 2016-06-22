@@ -68,10 +68,16 @@ public class SetupController extends Controller {
 
         WriteResult result = confirmationDao.insert(oldData);
         if (result.wasAcknowledged()) {
-            final String upsertedId = result.getUpsertedId().toString();
-            log.info("Confirmation {} created", upsertedId);
+            final String upsertedId;
+            if (result.isUpdateOfExisting()) {
+                upsertedId = oldData.getId().toString();
+                log.info("Confirmation {} updated", upsertedId);
+            } else {
+                upsertedId = result.getUpsertedId().toString();
+                log.info("Confirmation {} created", upsertedId);
+            }
             authorizeCall.setId(upsertedId);
-            return redirect(authorizeCall);
+            return status(333).withHeader("Location", authorizeCall.url());
         } else {
             log.error("Error while persisting confirmation. {}", result.toString());
             return internalServerError(getMsg().at(UNEXPECTED_ERROR));
