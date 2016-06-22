@@ -6,9 +6,11 @@ import models.Confirmation;
 import models.MailingList;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
+import play.Configuration;
 import play.Logger;
 import play.data.DynamicForm;
 import play.data.FormFactory;
+import play.inject.ConfigurationProvider;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -23,17 +25,23 @@ import java.util.concurrent.CompletionStage;
  */
 public class SaveController extends Controller {
 
+    private static final String INSTALLATION_URL = "xola.installation.url";
+    private static final String API_KEY_HEADER = "X-API-KEY";
+    private static final String API_KEY = "xola.api.key";
     private final Logger.ALogger log = Logger.of(SaveController.class);
 
     private final FormFactory formFactory;
     private final WSClient ws;
     private final ConfirmationDao confirmationDao;
+    private final Configuration configuration;
 
     @Inject
-    public SaveController(FormFactory formFactory, WSClient ws, ConfirmationDao confirmationDao) {
+    public SaveController(FormFactory formFactory, WSClient ws, ConfirmationDao confirmationDao,
+                          ConfigurationProvider configurationProvider) {
         this.formFactory = formFactory;
         this.ws = ws;
         this.confirmationDao = confirmationDao;
+        this.configuration = configurationProvider.get();
     }
 
     public CompletionStage<Result> index() {
@@ -58,23 +66,25 @@ public class SaveController extends Controller {
         WriteResult result = confirmationDao.insert(confirmation);
         if (result.wasAcknowledged()) {
             log.info("Plugin is setup successfully for confirmation {}", confirmationId);
-            return CompletableFuture.supplyAsync(this::confirmInstallationWithXola)
-                    .thenApply((Integer status) -> {
-                        if (status == Http.Status.CREATED || status == Http.Status.OK) {
-                            return redirect(controllers.routes.FinalController.index("success"));
-                        } else {
-                            return redirect(controllers.routes.FinalController.index("error"));
-                        }
-                    });
+            return finalizeConfiguration(confirmation);
         } else {
             log.error("Error while updating the selected mailing list to db.");
             return CompletableFuture.completedFuture(internalServerError("Error saving the selection."));
         }
     }
 
-    private Integer confirmInstallationWithXola() {
-        // TODO: Call the Xola App Store for installation confirmation.
-        //CompletionStage<WSResponse> response = ws.url("").setHeader("","").post("");
-        return Http.Status.INTERNAL_SERVER_ERROR;
+    private CompletionStage<Result> finalizeConfiguration(Confirmation confirmation) {
+        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getPluginId(),
+                confirmation.getUser().getId()))
+                .setHeader(API_KEY_HEADER, configuration.getString(API_KEY))
+                .post("")
+                .thenApply(wsResponse -> {
+                    if (wsResponse.getStatus() == Http.Status.CREATED || wsResponse.getStatus() == Http.Status.OK) {
+                        return redirect(controllers.routes.FinalController.index("success"));
+                    } else {
+                        return redirect(controllers.routes.FinalController.index("error"));
+                    }
+                });
     }
+
 }
