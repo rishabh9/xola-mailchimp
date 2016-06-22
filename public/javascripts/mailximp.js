@@ -14,4 +14,8 @@ $(document).ready(function () {
             $("#id").val(id);
             $("#name").val(name);
     });
+
+    $('select.dropdown')
+      .dropdown()
+    ;
 });
