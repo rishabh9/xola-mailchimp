@@ -2,6 +2,9 @@
 @main(title = "Approval Listing") {
     @if("success".equalsIgnoreCase(message)) {
         You have successfully configured the plugin.
+    }
+    @if("exists".equalsIgnoreCase(message)) {
+        The plugin is already installed.
     } else {
         There was an error while seting up the plugin. Please try again.
     }

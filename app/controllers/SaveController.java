@@ -81,6 +81,8 @@ public class SaveController extends Controller {
                 .thenApply(wsResponse -> {
                     if (wsResponse.getStatus() == Http.Status.CREATED || wsResponse.getStatus() == Http.Status.OK) {
                         return redirect(controllers.routes.FinalController.index("success"));
+                    } else if (wsResponse.getStatus() == Http.Status.CONFLICT) {
+                        return redirect(controllers.routes.FinalController.index("exists"));
                     } else {
                         return redirect(controllers.routes.FinalController.index("error"));
                     }
