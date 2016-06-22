@@ -31,6 +31,10 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
         return jongo.getCollection("confirmations");
     }
 
+    private MongoCollection dumps() {
+        return jongo.getCollection("dumps");
+    }
+
     @Override
     public List<Confirmation> getAll(int limit, int skip) {
         MongoCursor cursor = confirmations().find().skip(skip).limit(limit).as(Confirmation.class);
@@ -69,7 +73,19 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     @Override
     public Confirmation getByUserId(String userId) {
         return confirmations()
-                .findOne("{user: {id: #}}", userId)
+                .findOne("{user.id: #}", userId)
                 .as(Confirmation.class);
+    }
+
+    @Override
+    public Confirmation getByUserEmail(String email) {
+        return confirmations()
+                .findOne("{user.email: #}", email)
+                .as(Confirmation.class);
+    }
+
+    @Override
+    public void dump(String json) {
+        dumps().insert(json);
     }
 }

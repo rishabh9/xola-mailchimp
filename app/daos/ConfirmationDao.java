@@ -12,4 +12,6 @@ import org.bson.types.ObjectId;
 public interface ConfirmationDao extends GenericDao<Confirmation, ObjectId> {
 
     Confirmation getByUserId(String userId);
+    Confirmation getByUserEmail(String email);
+    void dump(String json);
 }
