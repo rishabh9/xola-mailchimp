@@ -74,7 +74,7 @@ public class SaveController extends Controller {
     }
 
     private CompletionStage<Result> finalizeConfiguration(Confirmation confirmation) {
-        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getPluginId(),
+        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getInstallationId(),
                 confirmation.getUser().getId()))
                 .setHeader(API_KEY_HEADER, configuration.getString(API_KEY))
                 .post("")

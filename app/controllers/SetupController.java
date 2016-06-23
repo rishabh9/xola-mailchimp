@@ -91,7 +91,7 @@ public class SetupController extends Controller {
     }
 
     private boolean isInvalid(Confirmation newData) {
-        if (!StringUtils.hasText(newData.getPluginId()))
+        if (!StringUtils.hasText(newData.getInstallationId()))
             return true;
         if (null == newData.getUser())
             return true;
@@ -101,7 +101,7 @@ public class SetupController extends Controller {
     }
 
     private void copyOverData(Confirmation source, Confirmation destination) {
-        destination.setPluginId(source.getPluginId());
+        destination.setInstallationId(source.getInstallationId());
         if (null != destination.getUser()) {
             destination.getUser().setName(source.getUser().getName());
             destination.getUser().setCompany(source.getUser().getCompany());

@@ -7,19 +7,19 @@ import java.util.Objects;
  */
 public class Confirmation extends BaseModel {
 
-    private String pluginId;
+    private String installationId;
     private User user;
     private String oauthCode;
     private String accessToken;
     private Metadata metadata;
     private MailingList list;
 
-    public String getPluginId() {
-        return pluginId;
+    public String getInstallationId() {
+        return installationId;
     }
 
-    public void setPluginId(String pluginId) {
-        this.pluginId = pluginId;
+    public void setInstallationId(String installationId) {
+        this.installationId = installationId;
     }
 
     public User getUser() {
@@ -67,7 +67,7 @@ public class Confirmation extends BaseModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Confirmation that = (Confirmation) o;
-        return Objects.equals(pluginId, that.pluginId) &&
+        return Objects.equals(installationId, that.installationId) &&
                 Objects.equals(user, that.user) &&
                 Objects.equals(oauthCode, that.oauthCode) &&
                 Objects.equals(accessToken, that.accessToken) &&
@@ -77,13 +77,13 @@ public class Confirmation extends BaseModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pluginId, user, oauthCode, accessToken, metadata, list);
+        return Objects.hash(installationId, user, oauthCode, accessToken, metadata, list);
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Confirmation{");
-        sb.append("pluginId='").append(pluginId).append('\'');
+        sb.append("installationId='").append(installationId).append('\'');
         sb.append(", user=").append(user);
         sb.append(", oauthCode='").append(oauthCode).append('\'');
         sb.append(", accessToken='").append(accessToken).append('\'');
