@@ -1,16 +1,42 @@
 @*
- * This template takes a single argument, a String containing a
- * message to display.
- *@
-@(message: String)
+* This template takes a single argument, a String containing a
+* message to display.
+*@
+@(url: String)
 
 @*
- * Call the `main` template with two arguments. The first
- * argument is a `String` with the title of the page, the second
- * argument is an `Html` object containing the body of the page.
- *@
-@main("Welcome to Play") {
+* Call the `main` template with two arguments. The first
+* argument is a `String` with the title of the page, the second
+* argument is an `Html` object containing the body of the page.
+*@
+@main("Welcome to mailXimp") {
 
-    message
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#cancel").click(
+            function () {
+                window.close();
+        });
+
+        $("#submit").click(
+            function () {
+                var encoded = '@url';
+                location.href = encoded.replace(/&amp;/g, '&');
+        });
+    });
+    </script>
+    <div class="ui grid">
+        <div class="sixteen wide column"></div>
+        <div class="three wide column"></div>
+        <div class="ten wide column">
+                <h1 class="ui dividing header">Welcome to mailXimp!</h1>
+                <div class="ui raised segment">
+                    <p>We will now begin with the integration of Mailchimp with Xola.</p>
+                </div>
+                <button id="submit" name="submit" class="ui primary button">Let's begin!</button>
+                <button id="cancel" name="cancel" class="ui button">Nah! Not now</button>
+        </div>
+        <div class="three wide column"></div>
+    </div>
 
 }

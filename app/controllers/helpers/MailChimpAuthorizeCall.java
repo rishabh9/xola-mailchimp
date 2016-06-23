@@ -42,7 +42,7 @@ public class MailChimpAuthorizeCall extends Call {
 
     @Override
     public String method() {
-        return "POST";
+        return "GET";
     }
 
     @Override

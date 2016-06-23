@@ -7,6 +7,8 @@ import daos.ConfirmationDao;
 import models.Confirmation;
 import org.springframework.util.StringUtils;
 import play.Logger;
+import play.data.DynamicForm;
+import play.data.FormFactory;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.libs.Json;
@@ -29,19 +31,23 @@ public class SetupController extends Controller {
     private final ConfirmationDao confirmationDao;
     private final MessagesApi messagesApi;
     private final MailChimpAuthorizeCall authorizeCall;
+    private final FormFactory formFactory;
 
     @Inject
     public SetupController(final ConfirmationDao confirmationDao, final MessagesApi messagesApi,
-                           final MailChimpAuthorizeCall authorizeCall) {
+                           final MailChimpAuthorizeCall authorizeCall, FormFactory formFactory) {
         super();
         this.confirmationDao = confirmationDao;
         this.messagesApi = messagesApi;
         this.authorizeCall = authorizeCall;
+        this.formFactory = formFactory;
     }
 
-    @BodyParser.Of(BodyParser.Json.class)
+    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
     public Result setup() {
-        JsonNode json = request().body().asJson();
+        DynamicForm requestData = formFactory.form().bindFromRequest();
+        String initData = requestData.get("initdata");
+        JsonNode json = Json.parse(initData);
         Confirmation newData;
         try {
             newData = Json.fromJson(json, Confirmation.class);
@@ -49,11 +55,11 @@ public class SetupController extends Controller {
         } catch (Exception e) {
             log.error("Error in parsing the confirmation data!", e);
             log.error("Received the following data: {}", json.toString());
-            return badRequest(INVALID_JSON);
+            return badRequest(views.html.errors.render(INVALID_JSON));
         }
 
         if (isInvalid(newData)) {
-            return badRequest(INVALID_JSON);
+            return badRequest(views.html.errors.render(INVALID_JSON));
         }
 
         String userId = newData.getUser().getId();
@@ -77,10 +83,10 @@ public class SetupController extends Controller {
                 log.info("Confirmation {} created", upsertedId);
             }
             authorizeCall.setId(upsertedId);
-            return status(333).withHeader("Location", authorizeCall.url());
+            return ok(views.html.index.render(authorizeCall.url()));
         } else {
             log.error("Error while persisting confirmation. {}", result.toString());
-            return internalServerError(getMsg().at(UNEXPECTED_ERROR));
+            return internalServerError(views.html.errors.render(getMsg().at(UNEXPECTED_ERROR)));
         }
     }
 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Demo</title>
+<head>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script type="text/javascript">
+
+    function getPluginDetails(pluginId) {
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            var param = JSON.stringify({
+              "pluginId": "5756837dfa7ac93347af770f",
+              "user": {
+                "id": "573af556a48cf2030a8b456f",
+                "name": "Matthew",
+                "email": "romedy@chammy.info",
+                "company": "ACME Corp."
+              }
+            });
+            var relativeUrl = JSON.parse(this.response).redirectUrl;
+            OpenWindowWithPost(relativeUrl, "width=800, height=600, left=100, top=100, resizable=yes, scrollbars=yes", "Plugin", param);
+          }
+        });
+        xhr.open("GET", "http://isengard.local:9010/plugins/" + pluginId);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+        xhr.setRequestHeader("X-API-KEY", "5wVqP_xvjXfmK9e0kLUj50Lx_wbIrljcmaJHfR_XZ2I");
+        xhr.send();
+    }
+
+    function OpenWindowWithPost(url, windowoption, name, params)
+    {
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", url);
+        form.setAttribute("target", name);
+
+         var input = document.createElement('input');
+         input.type = 'hidden';
+         input.name = 'initdata';
+         input.value = params;
+         form.appendChild(input);
+
+        document.body.appendChild(form);
+        //note I am using a post.htm page since I did not want to make double request to the page
+        //it might have some Page_Load call which might screw things up.
+        var nwin = window.open("post.htm", name, windowoption);
+        form.submit();
+        document.body.removeChild(form);
+        if (window.focus) nwin.focus();
+    }
+
+    </script>
+</head>
+<body>
+
+<h1>Demo Web Page</h1>
+
+<div id="resultDivContainer"></div>
+
+<form method="post" action="">
+    <button id="a" type="button" onclick="getPluginDetails('5756837dfa7ac93347af770f');">Get plugin details</button>
+</form>
+</body>
+</html>
+<!--
+    function setup(jsonData) {
+        var data = JSON.stringify({
+          "pluginId": "5756837dfa7ac93347af770f",
+          "user": {
+            "id": "573af556a48cf2030a8b456f",
+            "name": "Matthew",
+            "email": "romedy@chammy.info",
+            "company": "ACME Corp."
+          }
+        });
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            console.log(this.getResponseHeader('Location'));
+          }
+        });
+        xhr.open("POST", jsonData.redirectUrl);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+        xhr.send(data);
+    }
+
+    function OpenWindowWithPost(url, windowoption, name, params)
+    {
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", url);
+        form.setAttribute("target", name);
+
+         var input = document.createElement('input');
+         input.type = 'hidden';
+         input.name = 'initdata';
+         input.value = params;
+         form.appendChild(input);
+
+        document.body.appendChild(form);
+        //note I am using a post.htm page since I did not want to make double request to the page
+        //it might have some Page_Load call which might screw things up.
+        var nwin = window.open("post.htm", name, windowoption);
+        form.submit();
+        document.body.removeChild(form);
+        if (window.focus) nwin.focus();
+    }
+
+    function OpenWindowWithPost(url, windowoption, name, params)
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.open("POST", url);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+        xhr.setRequestHeader("X-API-KEY", "5wVqP_xvjXfmK9e0kLUj50Lx_wbIrljcmaJHfR_XZ2I");
+        var nwin = window.open("post.htm", name, windowoption);
+        xhr.send();
+        if (window.focus) nwin.focus();
+    }
+
+-->

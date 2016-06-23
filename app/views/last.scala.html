@@ -1,11 +1,58 @@
 @(message: String)
 @main(title = "Approval Listing") {
+
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            $("#cancel").click(
+                function () {
+                    window.close();
+            });
+        });
+
+</script>
+<div class="ui grid">
+    <div class="sixteen wide column"></div>
+    <div class="three wide column"></div>
+    <div class="ten wide column">
+
+
     @if("success".equalsIgnoreCase(message)) {
-        You have successfully configured the plugin.
+        <div class="ui success message">
+            <div class="header">
+                Your Mailchimp configuration was successful!
+            </div>
+            <p>You may now close this window and check Xola for integration completion.</p>
+        </div>
     }
     @if("exists".equalsIgnoreCase(message)) {
-        The plugin is already installed.
+        <div class="ui success message">
+            <div class="header">
+                Your Mailchimp configuration was successful!
+            </div>
+            <p>You may now close this window and check Xola for integration completion.</p>
+        </div>
     } else {
-        There was an error while seting up the plugin. Please try again.
+        <div class="ui negative message">
+            <div class="header">
+                Error while setting up Mailchimp!
+            </div>
+            <p>Please contact Xola for further help.</p>
+        </div>
     }
+
+    <button id="cancel" name="cancel" class="ui button">Close</button>
+    </div>
+    <div class="three wide column"></div>
+</div>
+
+
+
+
+
+
+
+
+
+
 }
