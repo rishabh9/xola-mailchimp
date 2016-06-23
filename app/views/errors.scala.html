@@ -1,0 +1,39 @@
+@(message: String)
+
+@main("Welcome to mailXimp") {
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            $("#cancel").click(
+                function () {
+                    window.close();
+            });
+        });
+
+</script>
+<div class="ui grid">
+    <div class="sixteen wide column"></div>
+    <div class="three wide column"></div>
+    <div class="ten wide column">
+
+
+        <div class="ui negative message">
+
+            <div class="header">
+                An unexpected error has occurred
+            </div>
+            @if(null != message && !"".equals(message)) {
+                <p>Reason: @message</p>
+                <p>This might be a temporary issue.
+                    Please close this window and re-try the installation.</p>
+            } else {
+                <p>Please close this window and re-try the installation.</p>
+            }
+        </div>
+
+        <button id="cancel" name="cancel" class="ui button">Close</button>
+    </div>
+    <div class="three wide column"></div>
+</div>
+
+}
