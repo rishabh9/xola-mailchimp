@@ -11,13 +11,15 @@
         xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
             var param = JSON.stringify({
-              "pluginId": "5756837dfa7ac93347af770f",
-              "user": {
-                "id": "573af556a48cf2030a8b456f",
-                "name": "Matthew",
-                "email": "romedy@chammy.info",
-                "company": "ACME Corp."
-              }
+                "installationId" : "5770e019fa7ac93c258b577d",
+                "pluginId" : "5770de4ffa7ac93c258b577c",
+                "pluginName" : "Mailximp",
+                "user" : {
+                    "id" : "573ae6cea48cf23e108b4567",
+                    "name" : "Hanh Vuong",
+                    "email" : "hanh.vuong@mailinator.com",
+                    "company" : "ACME Corp."
+                }
             });
             var relativeUrl = JSON.parse(this.response).redirectUrl;
             OpenWindowWithPost(relativeUrl, "width=800, height=600, left=100, top=100, resizable=yes, scrollbars=yes", "Plugin", param);
@@ -61,7 +63,7 @@
 <div id="resultDivContainer"></div>
 
 <form method="post" action="">
-    <button id="a" type="button" onclick="getPluginDetails('5756837dfa7ac93347af770f');">Get plugin details</button>
+    <button id="a" type="button" onclick="getPluginDetails('5770de4ffa7ac93c258b577c');">Get plugin details</button>
 </form>
 </body>
 </html>

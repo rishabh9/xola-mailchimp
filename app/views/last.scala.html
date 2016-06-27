@@ -32,7 +32,8 @@
             </div>
             <p>You may now close this window and check Xola for integration completion.</p>
         </div>
-    } else {
+    }
+    @if("error".equalsIgnoreCase(message)) {
         <div class="ui negative message">
             <div class="header">
                 Error while setting up Mailchimp!
