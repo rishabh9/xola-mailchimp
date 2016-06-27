@@ -74,12 +74,11 @@ public class SaveController extends Controller {
     }
 
     private CompletionStage<Result> finalizeConfiguration(Confirmation confirmation) {
-        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getInstallationId(),
-                confirmation.getUser().getId()))
+        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getInstallationId()))
                 .setHeader(API_KEY_HEADER, configuration.getString(API_KEY))
-                .post("")
+                .put("")
                 .thenApply(wsResponse -> {
-                    if (wsResponse.getStatus() == Http.Status.CREATED || wsResponse.getStatus() == Http.Status.OK) {
+                    if (wsResponse.getStatus() == Http.Status.OK) {
                         return redirect(controllers.routes.FinalController.index("success"));
                     } else if (wsResponse.getStatus() == Http.Status.CONFLICT) {
                         return redirect(controllers.routes.FinalController.index("exists"));
