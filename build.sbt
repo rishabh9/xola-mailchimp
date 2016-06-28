@@ -2,7 +2,7 @@ name := """mailximp"""
 
 version := "0.1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
+lazy val root = (project in file(".")).enablePlugins(PlayJava, DebianPlugin)
 
 scalaVersion := "2.11.7"
 
@@ -23,3 +23,13 @@ initialize := {
 }
 
 libraryDependencies += filters
+
+sources in (Compile, doc) := Seq.empty
+
+publishArtifact in (Compile, packageDoc) := false
+
+maintainer in Linux := "Rishabh Joshi <rishabh@xola.com>"
+
+packageSummary in Linux := "The Xola App Store"
+
+packageDescription := "The Xola App Store"

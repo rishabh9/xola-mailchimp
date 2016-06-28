@@ -5,14 +5,14 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
     <script type="text/javascript">
 
-    function getPluginDetails(pluginId) {
+    function installPlugin(pluginId) {
         var xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
         xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
             var param = JSON.stringify({
-                "installationId" : "5770e019fa7ac93c258b577d",
-                "pluginId" : "5770de4ffa7ac93c258b577c",
+                "installationId" : "577102f4fa7ac93c258b5788",
+                "pluginId" : "5771010efa7ac93c258b5786",
                 "pluginName" : "Mailximp",
                 "user" : {
                     "id" : "573ae6cea48cf23e108b4567",
@@ -63,7 +63,7 @@
 <div id="resultDivContainer"></div>
 
 <form method="post" action="">
-    <button id="a" type="button" onclick="getPluginDetails('5770de4ffa7ac93c258b577c');">Get plugin details</button>
+    <button id="a" type="button" onclick="installPlugin('5771010efa7ac93c258b5786');">Install</button>
 </form>
 </body>
 </html>
