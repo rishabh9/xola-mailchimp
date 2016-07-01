@@ -11,11 +11,11 @@
         xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
             var param = JSON.stringify({
-                "installationId" : "5774f633fa7ac929e6292427",
-                "pluginId" : "5774efd1fa7ac929e6292425",
+                "installationId" : "5776113ffa7ac9310143dab3",
+                "pluginId" : "57761079fa7ac9310143dab2",
                 "pluginName" : "Mailximp",
                 "user" : {
-                    "id" : "573ae6cea48cf23e108b4567",
+                    "id" : "5776075fa4f8762812f896fb",
                     "name" : "Hanh Vuong",
                     "email" : "hanh.vuong@mailinator.com",
                     "company" : "ACME Corp."
@@ -28,7 +28,7 @@
         xhr.open("GET", "http://isengard.local:9010/plugins/" + pluginId);
         xhr.setRequestHeader("content-type", "application/json");
         xhr.setRequestHeader("cache-control", "no-cache");
-        xhr.setRequestHeader("X-API-KEY", "5wVqP_xvjXfmK9e0kLUj50Lx_wbIrljcmaJHfR_XZ2I");
+        xhr.setRequestHeader("X-API-KEY", "3-qNwzq_i-sNn-Vg9_B84q6Udd1fRnAtVynjmTRhXVg");
         xhr.send();
     }
 
@@ -63,7 +63,7 @@
 <div id="resultDivContainer"></div>
 
 <form method="post" action="">
-    <button id="a" type="button" onclick="installPlugin('5774efd1fa7ac929e6292425');">Install</button>
+    <button id="a" type="button" onclick="installPlugin('57761079fa7ac9310143dab2');">Install</button>
 </form>
 </body>
 </html>

@@ -1,4 +1,4 @@
-name := """mailximp"""
+name := """xola-mailchimp"""
 
 version := "0.1.0"
 
@@ -30,6 +30,6 @@ publishArtifact in (Compile, packageDoc) := false
 
 maintainer in Linux := "Rishabh Joshi <rishabh@xola.com>"
 
-packageSummary in Linux := "The Xola App Store"
+packageSummary in Linux := "The Mailchimp Integration for Xola"
 
-packageDescription := "The Xola App Store"
+packageDescription := "The XMailchimp Integration for Xola"
