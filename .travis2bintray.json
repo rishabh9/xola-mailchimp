@@ -1,0 +1,25 @@
+{
+  "package": {
+    "name": "mailximp",
+    "repo": "Legolas",
+    "subject": "rishabh9",
+    "vcs_url": "https://github.com/rishabh9/mailximp.git",
+    "licenses": ["Apache-2.0"]
+  },
+
+  "version": {
+    "name": "0.1.0",
+    "desc": "First version",
+    "released": "2016-06-30",
+    "vcs_tag": "0.1.0"
+  },
+
+  "files":
+  [
+    {"includePattern": "target/universal(.*)*/(.*\\.tgz)", "excludePattern": ".*/do-not-deploy/.*", "uploadPattern": "legolas/$2"},
+    {"includePattern": "target/(.*\\.deb)", "excludePattern": ".*/do-not-deploy/.*", "uploadPattern": "legolas/$2"},
+    {"includePattern": "build/docs/(.*)", "uploadPattern": "docs/$1"}
+  ],
+
+  "publish": true
+}
