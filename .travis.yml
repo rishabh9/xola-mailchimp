@@ -13,3 +13,4 @@ deploy:
     secure: zj350wNMDDYSIj7P5sMeZmC+CavH7B2/pXpk/iZXMFeL7i69Jm1kIKr5hvcLh4MAVqyU4qbu5ZJIZQWW3t9UHa7vFMPAf2cbXEpJl7/5hGNdUbxHk+jDupU2ZM7FOa0d6hI/DOpvimHuWj+utxfjMwngCdS714JqvuVFFszDSzL6PT272BYk9CNaY1oR7Ae/qlSVrlhlGTiDe5owRCm/35vKAPh0O6nQyraTfLjaTi7HCallb/jMbzthIWOEhmurCQpRmOyqR7+L97+7vwEXb2eRWa+eJLdn5Y3pYR0vDdfJkdU7SxkJ/fQPFdDmtebASPDPWbRZYR1BEvOtSR/IdcMbInfRY72CHwQ9qGJQOd8CWfL3Vz907SeEAFVf7q3PWjAFnpDxzlZMgTk7eJinpGySQSU2rDdQXEp/EouyC+FcmUqCp/S3jVauasfo/keSHbng3n4tIfw1GkJx60Q1LsEZmCFA7nZijf/jJVmhLggepT5Hs9hAuSFuJhGg1eyGYyFnNDyzl3YWsB5Y7iGst4KsvHTaoGf+UPCvsuw+z7o4n0ZptPVEG1ksQw8b5+4XuW5J6Dw4zWrnTDJh+RXjcsz/qAC0FDZcmC1QpKeWnWgcIZotjba2O5zWl5Ju69vfLXuRs5jd80RC0BtHFQCbBzKkVu1QEc0o9OLJDMPbmYM=
   # passphrase: "Optional. In case a passphrase is configured on Bintray and GPG signing is used"
   # dry-run: "Optional. If true, skips sending requests to Bintray. Useful for testing your configuration"
+  skip_cleanup: true
