@@ -32,8 +32,8 @@ sudo update-java-alternatives -s java-8-oracle
 # In case you need Java 7
 ###############################################
 # sudo apt-get install -y openjdk-7-jdk
-#echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-#sudo apt-get -y -q install oracle-java7-installer
+# echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+# sudo apt-get -y -q install oracle-java7-installer
 
 ###############################################
 # Install Git
@@ -43,7 +43,7 @@ sudo update-java-alternatives -s java-8-oracle
 ###############################################
 # Install imagemagick
 ###############################################
-#sudo apt-get -y install imagemagick
+# sudo apt-get -y install imagemagick
 
 ###############################################
 # Install Scala
@@ -98,7 +98,7 @@ sudo apt-get -y install npm
 # cd utils
 # sudo ./install_server.sh
 # cd /home/vagrant/
-r# m redis-stable.tar.gz
+# rm redis-stable.tar.gz
 # echo "Redis done."
 
 ###############################################

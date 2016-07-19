@@ -44,13 +44,13 @@ Vagrant.configure(2) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network :forwarded_port, guest: 9012, host: 9012, id: "mailchimp"
-  config.vm.network :forwarded_port, guest: 9912, host: 9912, id: "debug"
-  config.vm.network :forwarded_port, guest: 22,   host: 2212, id: "ssh"
+  config.vm.network :forwarded_port, guest: 9000, host: 9013, id: "play"
+  config.vm.network :forwarded_port, guest: 9999, host: 9913, id: "debug"
+  config.vm.network :forwarded_port, guest: 22,   host: 2213, id: "ssh"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network :private_network, ip: "10.10.10.12"
+  config.vm.network :private_network, ip: "10.10.10.13"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
