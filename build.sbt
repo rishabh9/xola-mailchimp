@@ -32,4 +32,15 @@ maintainer in Linux := "Rishabh Joshi <rishabh@xola.com>"
 
 packageSummary in Linux := "The Mailchimp Integration for Xola"
 
-packageDescription := "The XMailchimp Integration for Xola"
+packageDescription := "The Mailchimp Integration for Xola"
+
+javaOptions in Test += "-Dconfig.file=conf/application-test.conf"
+
+javaOptions in Test += "-Dlogger.file=conf/logback-test.xml"
+
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
+
+testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-v"))
+
+// Uncomment below if play doesnt auto reload in vagrant
+// PlayKeys.playWatchService := play.sbtplugin.run.PlayWatchService.sbt(pollInterval.value)
