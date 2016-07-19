@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
     # max 75% CPU cap
     v.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
     # give vm max 3GB ram
-    v.memory = 1024
+    v.memory = 2048
   end
 
   # run "vagrant-machine-setup.sh" shell script when setting up our machine
