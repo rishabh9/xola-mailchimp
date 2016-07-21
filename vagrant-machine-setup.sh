@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-#variables
+# variables - DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU'RE DOING!
 activatorVersion="1.3.10"
 sbtVersion="0.13.11"
+
+# Github credentials - Change these to your credentials
+email="john.doe@example.com"
+name="John Doe"
 
 echo "=========================================="
 echo "Provision VM START"
@@ -38,7 +42,9 @@ sudo update-java-alternatives -s java-8-oracle
 ###############################################
 # Install Git
 ###############################################
-# sudo apt-get -y install git
+sudo apt-get -y install git
+git config --global user.email "$email"
+git config --global user.name "$name"
 
 ###############################################
 # Install imagemagick
