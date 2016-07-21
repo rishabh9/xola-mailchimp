@@ -1,3 +1,5 @@
+import ReleaseTransformations._
+
 name := """xola-mailchimp"""
 
 version := "0.1.0"
@@ -42,5 +44,19 @@ javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
 
 testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-v"))
 
-// Uncomment below if play doesnt auto reload in vagrant
+// Uncomment below if play doesn't auto reload in vagrant
 // PlayKeys.playWatchService := play.sbtplugin.run.PlayWatchService.sbt(pollInterval.value)
+
+// The Release configuration
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,              // : ReleaseStep
+  inquireVersions,                        // : ReleaseStep
+  runTest,                                // : ReleaseStep
+  setReleaseVersion,                      // : ReleaseStep
+  commitReleaseVersion,                   // : ReleaseStep, performs the initial git checks
+  tagRelease,                             // : ReleaseStep
+  //publishArtifacts,                       // : ReleaseStep, checks whether `publishTo` is properly set up
+  setNextVersion,                         // : ReleaseStep
+  commitNextVersion,                      // : ReleaseStep
+  pushChanges                             // : ReleaseStep, also checks that an upstream branch is properly configured
+)

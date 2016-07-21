@@ -23,3 +23,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-play-enhancer" % "1.1.0")
 // Uncomment the below line to view dependencyGraph
 // Url - https://github.com/jrudolph/sbt-dependency-graph
 // addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
+
+// SBT Release Plugin
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3")
