@@ -40,23 +40,29 @@ public class IncomingDataController extends Controller {
         JsonNode json = request().body().asJson();
         confirmationDao.dump(json.toString());
         String email = json.findPath("customerEmail").textValue();
+        String sellerId = json.findPath("seller").findPath("id").textValue();
+        log.debug("To add email {} into mailing list of seller {}", email, sellerId);
         if (email == null) {
             log.warn("Incoming data is missing email parameter");
             return CompletableFuture.completedFuture(badRequest("Missing parameter [customerEmail]"));
         } else {
             log.debug("Making call to Mailchimp to add to mailing list");
-            Confirmation confirmation = confirmationDao.getByUserEmail(email);
-            if (null != confirmation.getList() && StringUtils.hasText(confirmation.getList().getId())) {
+            Confirmation confirmation = confirmationDao.getByUserId(sellerId);
+            if (null != confirmation && null != confirmation.getList()
+                    && StringUtils.hasText(confirmation.getList().getId())) {
                 WSRequest request = ws.url(getUrl(confirmation))
                         .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + confirmation.getAccessToken())
                         .setContentType(Http.MimeTypes.JSON);
                 ObjectNode data = Json.newObject();
                 data.put("email_address", email);
                 data.put("status", "subscribed");
-                return request.post(data).thenApply(wsResponse -> ok(wsResponse.asJson()));
+                return request.post(data).thenApply(wsResponse -> {
+                    JsonNode jsonResponse = wsResponse.asJson();
+                    log.debug("Response from Mailchimp {}",  jsonResponse.asText());
+                    return ok(jsonResponse);
+                });
             } else {
-                log.error("Improper configuration for user {}", confirmation.getUser().getId());
-                log.error("We do not have a mailing list configured for user {}", confirmation.getUser().getId());
+                log.error("Did not find configuration for user {}", email);
                 return CompletableFuture.completedFuture(internalServerError("Bad/missing configuration!"));
             }
         }

@@ -29,46 +29,55 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
 
     @Override
     public CompletionStage<Result> onClientError(Http.RequestHeader request, int statusCode, String message) {
+        log.error("ERROR-HANDLER: Status Code: {}, Message: {}", statusCode, message);
         return CompletableFuture.completedFuture(Results.badRequest(views.html.errors.render(message)));
     }
 
     @Override
     protected CompletionStage<Result> onBadRequest(Http.RequestHeader request, String message) {
+        log.error("ERROR-HANDLER: Message: {}", message);
         return CompletableFuture.completedFuture(Results.badRequest(views.html.errors.render(message)));
     }
 
     @Override
     protected CompletionStage<Result> onForbidden(Http.RequestHeader request, String message) {
+        log.error("ERROR-HANDLER: Message: {}", message);
         return CompletableFuture.completedFuture(Results.forbidden(views.html.errors.render(message)));
     }
 
     @Override
     protected CompletionStage<Result> onNotFound(Http.RequestHeader request, String message) {
+        log.error("ERROR-HANDLER: Message: {}", message);
         return CompletableFuture.completedFuture(Results.notFound(views.html.errors.render(message)));
     }
 
     @Override
     protected CompletionStage<Result> onOtherClientError(Http.RequestHeader request, int statusCode, String message) {
+        log.error("ERROR-HANDLER: Status Code: {}, Message: {}", statusCode, message);
         return CompletableFuture.completedFuture(Results.badRequest(views.html.errors.render(message)));
     }
 
     @Override
     public CompletionStage<Result> onServerError(Http.RequestHeader request, Throwable exception) {
+        log.error("ERROR-HANDLER: Message: {}", exception.getMessage(), exception);
         return CompletableFuture.completedFuture(Results.internalServerError(views.html.errors.render(exception.getMessage())));
     }
 
     @Override
-    protected void logServerError(Http.RequestHeader request, UsefulException usefulException) {
-        super.logServerError(request, usefulException);
+    protected void logServerError(Http.RequestHeader request, UsefulException exception) {
+        log.error("ERROR-HANDLER: Message: {}", exception.getMessage(), exception);
+        super.logServerError(request, exception);
     }
 
     @Override
     protected CompletionStage<Result> onDevServerError(Http.RequestHeader request, UsefulException exception) {
+        log.error("ERROR-HANDLER: Message: {}", exception.getMessage(), exception);
         return super.onDevServerError(request, exception);
     }
 
     @Override
     protected CompletionStage<Result> onProdServerError(Http.RequestHeader request, UsefulException exception) {
+        log.error("ERROR-HANDLER: Message: {}", exception.getMessage(), exception);
         return CompletableFuture.completedFuture(Results.internalServerError(views.html.errors.render(exception.getMessage())));
     }
 }
