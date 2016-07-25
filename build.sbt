@@ -2,7 +2,7 @@ import ReleaseTransformations._
 
 name := """xola-mailchimp"""
 
-version := "0.1.0"
+version := (version in ThisBuild).value
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, DebianPlugin)
 
@@ -35,6 +35,13 @@ maintainer in Linux := "Rishabh Joshi <rishabh@xola.com>"
 packageSummary in Linux := "The Mailchimp Integration for Xola"
 
 packageDescription := "The Mailchimp Integration for Xola"
+
+mappings in Universal <++= (packageBin in Compile) map { jar =>
+  val scriptsDir = new java.io.File("scripts/")
+  scriptsDir.listFiles.toSeq.map { f =>
+    f -> ("bin/" + f.getName)
+  }
+}
 
 javaOptions in Test += "-Dconfig.file=conf/application-test.conf"
 
