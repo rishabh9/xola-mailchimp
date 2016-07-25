@@ -159,6 +159,12 @@ source ~/.bashrc
 source ~/.bashrc
 
 ###############################################
+# Create deployment folders
+###############################################
+mkdir -p /var/xola/plugins/mailchimp/conf
+mkdir -p /var/log/xola
+
+###############################################
 # Show installation summary
 ###############################################
 echo "=========================================="
