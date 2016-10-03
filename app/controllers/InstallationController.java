@@ -1,93 +1,90 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
-import controllers.helpers.MailChimpAuthorizeCall;
 import daos.ConfirmationDao;
 import models.Confirmation;
 import org.springframework.util.StringUtils;
 import play.Logger;
-import play.data.DynamicForm;
-import play.data.FormFactory;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.Errors;
 
 import javax.inject.Inject;
 
+import static utils.MessageKey.INVALID_JSON;
 import static utils.MessageKey.UNEXPECTED_ERROR;
 
 /**
  * @author rishabh
  */
-public class SetupController extends Controller {
+public class InstallationController extends Controller {
 
-    private static final String INVALID_JSON = "Invalid Json.";
-    private final Logger.ALogger log = Logger.of(SetupController.class);
+    private final Logger.ALogger log = Logger.of(InstallationController.class);
 
     private final ConfirmationDao confirmationDao;
     private final MessagesApi messagesApi;
-    private final MailChimpAuthorizeCall authorizeCall;
-    private final FormFactory formFactory;
 
     @Inject
-    public SetupController(final ConfirmationDao confirmationDao, final MessagesApi messagesApi,
-                           final MailChimpAuthorizeCall authorizeCall, FormFactory formFactory) {
-        super();
+    public InstallationController(ConfirmationDao confirmationDao, MessagesApi messagesApi) {
         this.confirmationDao = confirmationDao;
         this.messagesApi = messagesApi;
-        this.authorizeCall = authorizeCall;
-        this.formFactory = formFactory;
     }
 
-    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
-    public Result setup() {
-        DynamicForm requestData = formFactory.form().bindFromRequest();
-        String initData = requestData.get("initdata");
-        JsonNode json = Json.parse(initData);
-        Confirmation newData;
+    @BodyParser.Of(BodyParser.Json.class)
+    public Result initiateInstall() {
+        log.info("Received installation request...");
+        Messages messages = messagesApi.preferred(request());
+        JsonNode json = request().body().asJson();
+        Confirmation confirmation;
         try {
-            newData = Json.fromJson(json, Confirmation.class);
-            log.debug("Received confirmation: {}", newData.toString());
+            confirmation = Json.fromJson(json, Confirmation.class);
+            log.debug("Received confirmation: {}", confirmation.toString());
         } catch (Exception e) {
             log.error("Error in parsing the confirmation data!", e);
             log.error("Received the following data: {}", json.toString());
-            return badRequest(views.html.errors.render(INVALID_JSON));
+            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
         }
-
-        if (isInvalid(newData)) {
-            return badRequest(views.html.errors.render(INVALID_JSON));
+        if (isInvalid(confirmation)) {
+            log.debug("Received invalid json in request - {}", json.toString());
+            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
         }
-
-        String userId = newData.getUser().getId();
-        Confirmation oldData = confirmationDao.getByUserId(userId);
-        if (null != oldData) {
+        String userId = confirmation.getUser().getId();
+        Confirmation existingConfirmation = confirmationDao.getByUserId(userId);
+        if (null != existingConfirmation) {
             log.debug("Found an existing entry for user {}", userId);
-            copyOverData(newData, oldData);
+            copyOverData(confirmation, existingConfirmation);
         } else {
             log.debug("Brand new user {}!", userId);
-            oldData = newData;
+            existingConfirmation = confirmation;
         }
-
-        WriteResult result = confirmationDao.insert(oldData);
+        WriteResult result = confirmationDao.insert(existingConfirmation);
         if (result.wasAcknowledged()) {
             final String upsertedId;
             if (result.isUpdateOfExisting()) {
-                upsertedId = oldData.getId().toString();
+                upsertedId = existingConfirmation.getId().toString();
                 log.info("Confirmation {} updated", upsertedId);
+                return ok(confirmationJson(upsertedId));
             } else {
                 upsertedId = result.getUpsertedId().toString();
                 log.info("Confirmation {} created", upsertedId);
+                return created(confirmationJson(upsertedId));
             }
-            authorizeCall.setId(upsertedId);
-            return ok(views.html.index.render(authorizeCall.url()));
         } else {
             log.error("Error while persisting confirmation. {}", result.toString());
-            return internalServerError(views.html.errors.render(getMsg().at(UNEXPECTED_ERROR)));
+            return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
         }
+    }
+
+    private JsonNode confirmationJson(String upsertedId) {
+        ObjectNode json = Json.newObject();
+        json.put("id", upsertedId);
+        return json;
     }
 
     private boolean isInvalid(Confirmation newData) {
@@ -109,9 +106,5 @@ public class SetupController extends Controller {
         } else {
             destination.setUser(source.getUser());
         }
-    }
-
-    private Messages getMsg() {
-        return messagesApi.preferred(request());
     }
 }

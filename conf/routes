@@ -5,9 +5,15 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file       controllers.Assets.versioned(path="/public", file: Asset)
 
-# Webpage URLs - Begin
-# The Init URL. Returns the page to initiate the entire process.
-POST    /init               controllers.SetupController.setup()
+# API Endpoint that receives the initial user data.
+POST    /plugin/install     controllers.InstallationController.initiateInstall()
+
+# API Endpoint that receives data from Xola.
+# It can be either webhook data and plugin configuration.
+POST    /plugin/data        controllers.IncomingDataController.index()
+
+# The Redirect URL. Xola redirect to this URL. It initiates the Mailchimp OAuth process.
+POST    /oauth/init         controllers.OAuthController.initiate()
 # The URL Mailchimp redirects to after completing the OAuth process
 GET     /oauth/finish       controllers.OAuthController.complete()
 # Display the list of Subscriptions List of the user
@@ -18,5 +24,3 @@ POST    /save               controllers.SaveController.index()
 GET     /final              controllers.FinalController.index(message: String)
 # Webpage URLs - End
 
-# API Endpoint that receives data from webhooks
-POST    /xola/events         controllers.IncomingDataController.index()

@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.WriteResult;
+import controllers.helpers.MailChimpAuthorizeCall;
 import daos.ConfirmationDao;
 import models.Confirmation;
 import models.Metadata;
@@ -14,6 +15,7 @@ import play.data.FormFactory;
 import play.inject.ConfigurationProvider;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -40,18 +42,30 @@ public class OAuthController extends Controller {
     private final WSClient ws;
     private final ConfirmationDao confirmationDao;
     private final Configuration configuration;
+    private final MailChimpAuthorizeCall authorizeCall;
 
     @Inject
     public OAuthController(FormFactory formFactory, WSClient ws, ConfirmationDao confirmationDao,
-                           ConfigurationProvider configProvider) {
+                           ConfigurationProvider configProvider, MailChimpAuthorizeCall authorizeCall) {
         super();
         this.formFactory = formFactory;
         this.ws = ws;
         this.confirmationDao = confirmationDao;
         this.configuration = configProvider.get();
+        this.authorizeCall = authorizeCall;
+    }
+
+    @BodyParser.Of(BodyParser.FormUrlEncoded.class)
+    public Result initiate() {
+        log.debug("Received request to initiate OAuth...");
+        DynamicForm requestData = formFactory.form().bindFromRequest();
+        String initData = requestData.get("id");
+        authorizeCall.setId(initData);
+        return ok(views.html.index.render(authorizeCall.url()));
     }
 
     public CompletionStage<Result> complete() {
+        log.debug("Received request to complete OAuth...");
         DynamicForm requestData = formFactory.form().bindFromRequest();
         String code = requestData.get("code");
         String confirmationId = requestData.get("confirm");
