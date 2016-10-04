@@ -9,6 +9,9 @@ import org.jongo.MongoCursor;
 import uk.co.panaxiom.playjongo.PlayJongo;
 
 import javax.inject.Inject;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +96,8 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
 
     @Override
     public void dump(String json) {
-        dumps().insert(json);
+        dumps().insert("{ \"date\" : "
+                + ZonedDateTime.now(ZoneId.of("GMT")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                + ", \"data\" : " + json + " }");
     }
 }
