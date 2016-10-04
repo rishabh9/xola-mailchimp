@@ -24,7 +24,7 @@ import static play.mvc.Results.ok;
  * @author rishabh
  */
 @Singleton
-public class MailingListHelper {
+public final class MailingListHelper {
 
     private final Logger.ALogger log = Logger.of(MailingListHelper.class);
 
@@ -36,16 +36,16 @@ public class MailingListHelper {
     }
 
     public CompletionStage<Result> getMailingListsAsJson(Confirmation confirmation) {
-        return prepapreRequest(confirmation).get()
+        return request(confirmation).get()
                 .thenApply(wsResponse -> getListsForJson(wsResponse, confirmation));
     }
 
     public CompletionStage<Result> getMailingListsAsHTML(Confirmation confirmation) {
-        return prepapreRequest(confirmation).get()
+        return request(confirmation).get()
                 .thenApply(wsResponse -> getListsForHTML(wsResponse, confirmation));
     }
 
-    private WSRequest prepapreRequest(Confirmation confirmation) {
+    private WSRequest request(Confirmation confirmation) {
         return ws.url(confirmation.getMetadata().getApiEndpoint() + "/3.0/lists")
                 .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
                 .setHeader(Http.HeaderNames.CONTENT_TYPE, Http.MimeTypes.JSON)
