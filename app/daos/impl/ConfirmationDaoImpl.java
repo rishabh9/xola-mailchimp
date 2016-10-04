@@ -85,6 +85,13 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     }
 
     @Override
+    public Confirmation getByUserAndInstallation(String userId, String installationId) {
+        return confirmations()
+                .findOne("{$and: [{user.id: #}, {installationId: #}]}", userId, installationId)
+                .as(Confirmation.class);
+    }
+
+    @Override
     public void dump(String json) {
         dumps().insert(json);
     }

@@ -4,3 +4,5 @@ unexpected.error                    = We had a problem with our server. Try agai
 resource.not.found                  = Resource not found
 validation.invalid.id               = Invalid id
 invalid.json                        = Invalid Json Request.
+invalid.param.i                     = Invalid parameter [i].
+invalid.param.u                     = Invalid parameter [u].

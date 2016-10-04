@@ -17,10 +17,8 @@ POST    /oauth/init         controllers.OAuthController.initiate()
 # The URL Mailchimp redirects to after completing the OAuth process
 GET     /oauth/finish       controllers.OAuthController.complete()
 # Display the list of Subscriptions List of the user
-GET     /lists              controllers.ListController.index()
+GET     /lists              controllers.MailingListController.index()
 # Save the selected subscription list
 POST    /save               controllers.SaveController.index()
 # Display Success or Failure
 GET     /final              controllers.FinalController.index(message: String)
-# Webpage URLs - End
-
