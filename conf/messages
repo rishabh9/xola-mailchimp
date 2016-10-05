@@ -6,3 +6,5 @@ validation.invalid.id               = Invalid id
 invalid.json                        = Invalid Json Request.
 invalid.param.i                     = Invalid parameter [i].
 invalid.param.u                     = Invalid parameter [u].
+missing.param.email                 = Missing parameter [customerEmail]
+missing.config                      = Missing configuration.
