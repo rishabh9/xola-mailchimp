@@ -20,6 +20,7 @@ import utils.MessageKey;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -47,34 +48,31 @@ public class MailingListController extends Controller {
     }
 
     @BodyParser.Of(BodyParser.FormUrlEncoded.class)
-    public CompletionStage<Result> get() {
+    public CompletionStage<Result> getFieldData(String installationId, String field) {
         log.info("Request made to retrieve the mailings lists... as json");
         Messages messages = messagesApi.preferred(request());
-        DynamicForm requestData = formFactory.form().bindFromRequest();
-        String installationId = requestData.get("i");
-        String userId = requestData.get("u");
-        List<String> errors = validate(installationId, userId, messages);
+        List<String> errors = validate(installationId, field, messages);
         if (!errors.isEmpty()) {
             log.debug("Error validating the request parameters...");
             return CompletableFuture.completedFuture(badRequest(Errors.toJson(BAD_REQUEST, errors)));
         }
-        log.info("Requesting mailing list for installation {} and user {}", installationId, userId);
-        Confirmation confirmation = confirmationDao.getByUserAndInstallation(userId, installationId);
-        if (null == confirmation) {
-            log.debug("Didn't find the confirmation object having installationId: {} and user.id: {}",
-                    installationId, userId);
+        log.info("Requesting mailing list for installation {}", installationId);
+        Optional<Confirmation> confirmation = confirmationDao.getByInstallationId(installationId);
+        if (confirmation.isPresent()) {
+            return helper.getMailingListsAsJson(confirmation.get());
+        } else {
+            log.debug("Didn't find the confirmation object having installationId: {}", installationId);
             return CompletableFuture.completedFuture(
                     notFound(Errors.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND))));
         }
-        return helper.getMailingListsAsJson(confirmation);
     }
 
-    private List<String> validate(String installationId, String userId, Messages messages) {
+    private List<String> validate(String installationId, String field, Messages messages) {
         List<String> errors = new ArrayList<>();
         if (!StringUtils.hasText(installationId)) {
             errors.add(messages.at(MessageKey.INVALID_PARAM_I));
         }
-        if (!StringUtils.hasText(userId)) {
+        if (!StringUtils.hasText(field)) {
             errors.add(messages.at(MessageKey.INVALID_PARAM_U));
         }
         return errors;

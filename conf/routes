@@ -3,22 +3,31 @@
 # ~~~~
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file       controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+# Prescribed by Xola Plugin Documentation.
 # API Endpoint that receives the initial user data.
-POST    /plugin/install     controllers.InstallationController.initiateInstall()
+POST    /installations              controllers.InstallationController.initiateInstall()
 
+# Prescribed by Xola Plugin Documentation.
 # API Endpoint that receives data from Xola.
 # It can be either webhook data and plugin configuration.
-POST    /plugin/data        controllers.IncomingDataController.index()
+POST    /data                       controllers.IncomingDataController.index()
+
+# Prescribed by Xola Plugin Documentation.
+# API endpoints for CRUD on plugin configuration for a specific user.
+GET     /installation/:id/config            controllers.ConfigurationController.updateConfiguration(id: String)
+PUT     /installation/:id/config            controllers.ConfigurationController.getConfiguration(id: String)
+# Retrieve the list of Subscription-Lists of the installation id
+GET     /installation/:id/field/:field    controllers.MailingListController.getFieldData(id: String, field: String)
 
 # The Redirect URL. Xola redirect to this URL. It initiates the Mailchimp OAuth process.
-POST    /oauth/init         controllers.OAuthController.initiate()
+POST    /oauth/init                 controllers.OAuthController.initiate()
 # The URL Mailchimp redirects to after completing the OAuth process
-GET     /oauth/finish       controllers.OAuthController.complete()
+GET     /oauth/finish               controllers.OAuthController.complete()
 # Display the list of Subscriptions List of the user
-GET     /lists              controllers.MailingListController.index()
+GET     /lists                      controllers.MailingListController.index()
 # Save the selected subscription list
-POST    /save               controllers.SaveController.index()
+POST    /save                       controllers.SaveController.index()
 # Display Success or Failure
-GET     /final              controllers.FinalController.index(message: String)
+GET     /final                      controllers.FinalController.index(message: String)

@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author rishabh
@@ -99,5 +100,12 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
         dumps().insert("{ \"date\" : "
                 + ZonedDateTime.now(ZoneId.of("GMT")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                 + ", \"data\" : " + json + " }");
+    }
+
+    @Override
+    public Optional<Confirmation> getByInstallationId(String installationId) {
+        return Optional.ofNullable(confirmations()
+                .findOne("{installationId: #}", installationId)
+                .as(Confirmation.class));
     }
 }
