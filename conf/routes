@@ -12,14 +12,14 @@ POST    /installations              controllers.InstallationController.initiateI
 # Prescribed by Xola Plugin Documentation.
 # API Endpoint that receives data from Xola.
 # It can be either webhook data and plugin configuration.
-POST    /data                       controllers.IncomingDataController.index()
+POST    /events                       controllers.IncomingDataController.index()
 
 # Prescribed by Xola Plugin Documentation.
 # API endpoints for CRUD on plugin configuration for a specific user.
-GET     /installation/:id/config            controllers.ConfigurationController.updateConfiguration(id: String)
-PUT     /installation/:id/config            controllers.ConfigurationController.getConfiguration(id: String)
+GET     /installations/:id/config            controllers.ConfigurationController.updateConfiguration(id: String)
+PUT     /installations/:id/config            controllers.ConfigurationController.getConfiguration(id: String)
 # Retrieve the list of Subscription-Lists of the installation id
-GET     /installation/:id/field/:field    controllers.MailingListController.getFieldData(id: String, field: String)
+GET     /installations/:id/field/:field    controllers.MailingListController.getFieldData(id: String, field: String)
 
 # The Redirect URL. Xola redirect to this URL. It initiates the Mailchimp OAuth process.
 POST    /oauth/init                 controllers.OAuthController.initiate()
