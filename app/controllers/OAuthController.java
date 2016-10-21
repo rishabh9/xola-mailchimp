@@ -3,8 +3,8 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.WriteResult;
 import controllers.helpers.MailChimpAuthorizeCall;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import models.Metadata;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
@@ -40,17 +40,17 @@ public class OAuthController extends Controller {
 
     private final FormFactory formFactory;
     private final WSClient ws;
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
     private final Configuration configuration;
     private final MailChimpAuthorizeCall authorizeCall;
 
     @Inject
-    public OAuthController(FormFactory formFactory, WSClient ws, ConfirmationDao confirmationDao,
+    public OAuthController(FormFactory formFactory, WSClient ws, InstallationDao installationDao,
                            ConfigurationProvider configProvider, MailChimpAuthorizeCall authorizeCall) {
         super();
         this.formFactory = formFactory;
         this.ws = ws;
-        this.confirmationDao = confirmationDao;
+        this.installationDao = installationDao;
         this.configuration = configProvider.get();
         this.authorizeCall = authorizeCall;
     }
@@ -71,19 +71,19 @@ public class OAuthController extends Controller {
         String confirmationId = requestData.get("confirm");
         log.debug("OAuth2 Code: {}, ConfirmationId: {}", code, confirmationId);
 
-        Confirmation confirmation = getConfirmation(confirmationId);
-        if (null == confirmation) {
+        Installation installation = getConfirmation(confirmationId);
+        if (null == installation) {
             // This situation should not happen unless someone is accessing it from outside.
             log.error("Received invalid confirmationId {}", confirmationId);
             return CompletableFuture.completedFuture(badRequest());
         }
-        confirmation.setOauthCode(code);
-        updateConfirmation(confirmation);
-        return requestAccessToken(code, confirmation);
+        installation.setOauthCode(code);
+        updateConfirmation(installation);
+        return requestAccessToken(code, installation);
     }
 
-    private CompletionStage<Result> requestAccessToken(String code, Confirmation confirmation) {
-        String confirmId = confirmation.getId().toString();
+    private CompletionStage<Result> requestAccessToken(String code, Installation installation) {
+        String confirmId = installation.getId().toString();
         String data = "grant_type=authorization_code"
                 + "&client_id=" + configuration.getString(CLIENT_ID)
                 + "&client_secret=" + configuration.getString(CLIENT_SECRET)
@@ -102,8 +102,8 @@ public class OAuthController extends Controller {
                         return null;
                     } else {
                         String access_token = jsonNode.path("access_token").textValue();
-                        saveAccessToken(confirmation, confirmId, access_token);
-                        log.debug("Retrieving metadata for confirmation {}", confirmId);
+                        saveAccessToken(installation, confirmId, access_token);
+                        log.debug("Retrieving metadata for installation {}", confirmId);
                         return ws.url(configuration.getString(MAILCHIMP_METADATA_URL))
                                 .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
                                 .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + access_token)
@@ -114,16 +114,16 @@ public class OAuthController extends Controller {
                     if (null != wsResponse) {
                         JsonNode jsonNode = wsResponse.asJson();
                         if (jsonNode.path("dc").isMissingNode()) {
-                            log.error("Error retrieving metadata for confirmation {}", confirmId);
+                            log.error("Error retrieving metadata for installation {}", confirmId);
                             return internalServerError();
                         } else {
                             Metadata meta = new Metadata();
                             meta.setApiEndpoint(jsonNode.path("api_endpoint").asText());
                             meta.setDc(jsonNode.path("dc").asText());
                             meta.setLoginUrl(jsonNode.path("login_url").asText());
-                            confirmation.setMetadata(meta);
-                            log.debug("Saving metadata for confirmation {}", confirmId);
-                            updateConfirmation(confirmation);
+                            installation.setMetadata(meta);
+                            log.debug("Saving metadata for installation {}", confirmId);
+                            updateConfirmation(installation);
                             log.debug("Redirect to available lists page...");
                             return redirect("/lists?confirm=" + confirmId);
                         }
@@ -133,16 +133,16 @@ public class OAuthController extends Controller {
                 });
     }
 
-    private String saveAccessToken(Confirmation confirmation, String confirmId, String access_token) {
-        log.debug("Access token {} for Confirmation {}", access_token, confirmId);
-        confirmation.setAccessToken(access_token);
-        updateConfirmation(confirmation);
+    private String saveAccessToken(Installation installation, String confirmId, String access_token) {
+        log.debug("Access token {} for Installation {}", access_token, confirmId);
+        installation.setAccessToken(access_token);
+        updateConfirmation(installation);
         return access_token;
     }
 
-    private void updateConfirmation(Confirmation confirmation) {
-        log.debug("Updating confirmation id {}", confirmation.getId().toString());
-        WriteResult result = confirmationDao.insert(confirmation);
+    private void updateConfirmation(Installation installation) {
+        log.debug("Updating installation id {}", installation.getId().toString());
+        WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
             log.debug("Update {}", result.isUpdateOfExisting());
         } else {
@@ -150,10 +150,10 @@ public class OAuthController extends Controller {
         }
     }
 
-    private Confirmation getConfirmation(String confirmationId) {
+    private Installation getConfirmation(String confirmationId) {
         if (StringUtils.hasText(confirmationId)) {
             try {
-                return confirmationDao.get(new ObjectId(confirmationId));
+                return installationDao.get(new ObjectId(confirmationId));
             } catch (IllegalArgumentException e) {
                 log.error("Invalid Id", e);
                 return null;

@@ -2,9 +2,9 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.WriteResult;
-import daos.ConfirmationDao;
+import daos.InstallationDao;
 import models.Configuration;
-import models.Confirmation;
+import models.Installation;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -27,13 +27,13 @@ public class ConfigurationController extends Controller {
     private final transient Logger.ALogger log = Logger.of(ConfigurationController.class);
 
     private final MessagesApi messagesApi;
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
 
     @Inject
-    public ConfigurationController(MessagesApi messagesApi, ConfirmationDao confirmationDao) {
+    public ConfigurationController(MessagesApi messagesApi, InstallationDao installationDao) {
         super();
         this.messagesApi = messagesApi;
-        this.confirmationDao = confirmationDao;
+        this.installationDao = installationDao;
     }
 
     /**
@@ -50,7 +50,7 @@ public class ConfigurationController extends Controller {
             log.debug("Invalid installation id provided: {}", installationId);
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.MISSING_INSTLL_ID)));
         }
-        Optional<Confirmation> confirmation = confirmationDao.getByInstallationId(installationId);
+        Optional<Installation> confirmation = installationDao.getByInstallationId(installationId);
         if (!confirmation.isPresent()) {
             log.debug("Installation with the given installation id was not found: {}", installationId);
             return notFound(Errors.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND)));
@@ -61,12 +61,12 @@ public class ConfigurationController extends Controller {
             log.debug("Invalid request received: {}", json);
             badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
-        Confirmation confirm = confirmation.get();
+        Installation confirm = confirmation.get();
         confirm.setConfiguration(configuration);
-        WriteResult result = confirmationDao.insert(confirm);
+        WriteResult result = installationDao.insert(confirm);
         if (result.wasAcknowledged()) {
             log.debug("Configuration saved successfully for installation {}", installationId);
-            return ok(Json.toJson(confirmationDao.get(confirm.getId()).getConfiguration()));
+            return ok(Json.toJson(installationDao.get(confirm.getId()).getConfiguration()));
         } else {
             log.debug("Error saving configuration for installation {}", installationId);
             return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, MessageKey.UNEXPECTED_ERROR));
@@ -87,7 +87,7 @@ public class ConfigurationController extends Controller {
             log.debug("Invalid installation id provided: {}", installationId);
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.MISSING_INSTLL_ID)));
         }
-        Optional<Confirmation> confirmation = confirmationDao.getByInstallationId(installationId);
+        Optional<Installation> confirmation = installationDao.getByInstallationId(installationId);
         if (!confirmation.isPresent()) {
             log.debug("Installation with the given installation id was not found: {}", installationId);
             return notFound(Errors.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND)));

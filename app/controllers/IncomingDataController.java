@@ -2,8 +2,8 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -31,13 +31,13 @@ public class IncomingDataController extends Controller {
 
     private final Logger.ALogger log = Logger.of(IncomingDataController.class);
 
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
     private final WSClient ws;
     private final MessagesApi messagesApi;
 
     @Inject
-    public IncomingDataController(ConfirmationDao confirmationDao, WSClient ws, MessagesApi messagesApi) {
-        this.confirmationDao = confirmationDao;
+    public IncomingDataController(InstallationDao installationDao, WSClient ws, MessagesApi messagesApi) {
+        this.installationDao = installationDao;
         this.ws = ws;
         this.messagesApi = messagesApi;
     }
@@ -46,7 +46,7 @@ public class IncomingDataController extends Controller {
     public CompletionStage<Result> index() {
         log.info("Received request from Xola...");
         JsonNode json = request().body().asJson();
-        confirmationDao.dump(json.toString());
+        installationDao.dump(json.toString());
         Messages messages = messagesApi.preferred(request());
         String email = json.findPath("customerEmail").textValue();
         String sellerId = json.findPath("seller").findPath("id").textValue();
@@ -57,11 +57,11 @@ public class IncomingDataController extends Controller {
                     badRequest(Errors.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
         } else {
             log.debug("Making call to Mailchimp to add to mailing list");
-            Confirmation confirmation = confirmationDao.getByUserId(sellerId);
-            if (null != confirmation && null != confirmation.getList()
-                    && StringUtils.hasText(confirmation.getList().getId())) {
-                WSRequest request = ws.url(getUrl(confirmation))
-                        .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + confirmation.getAccessToken())
+            Installation installation = installationDao.getByUserId(sellerId);
+            if (null != installation && null != installation.getList()
+                    && StringUtils.hasText(installation.getList().getId())) {
+                WSRequest request = ws.url(getUrl(installation))
+                        .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + installation.getAccessToken())
                         .setContentType(Http.MimeTypes.JSON);
                 ObjectNode data = Json.newObject();
                 data.put("email_address", email);
@@ -79,8 +79,8 @@ public class IncomingDataController extends Controller {
         }
     }
 
-    private String getUrl(Confirmation confirmation) {
-        return confirmation.getMetadata().getApiEndpoint()
-                + "/3.0/lists/" + confirmation.getList().getId() + "/members";
+    private String getUrl(Installation installation) {
+        return installation.getMetadata().getApiEndpoint()
+                + "/3.0/lists/" + installation.getList().getId() + "/members";
     }
 }

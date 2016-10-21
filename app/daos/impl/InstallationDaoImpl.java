@@ -1,8 +1,8 @@
 package daos.impl;
 
 import com.mongodb.WriteResult;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
@@ -19,20 +19,20 @@ import java.util.Optional;
 /**
  * @author rishabh
  */
-public class ConfirmationDaoImpl implements ConfirmationDao {
+public class InstallationDaoImpl implements InstallationDao {
 
     private PlayJongo jongo;
 
     @Inject
-    public ConfirmationDaoImpl(PlayJongo jongo) {
+    public InstallationDaoImpl(PlayJongo jongo) {
         this.jongo = jongo;
     }
 
     /**
      * @return The MongoCollection of Installations.
      */
-    private MongoCollection confirmations() {
-        return jongo.getCollection("confirmations");
+    private MongoCollection installations() {
+        return jongo.getCollection("installations");
     }
 
     private MongoCollection dumps() {
@@ -40,18 +40,18 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     }
 
     @Override
-    public List<Confirmation> getAll(int limit, int skip) {
-        MongoCursor cursor = confirmations().find().skip(skip).limit(limit).as(Confirmation.class);
-        List<Confirmation> list = new ArrayList<>();
+    public List<Installation> getAll(int limit, int skip) {
+        MongoCursor cursor = installations().find().skip(skip).limit(limit).as(Installation.class);
+        List<Installation> list = new ArrayList<>();
         while (cursor.hasNext()) {
-            list.add((Confirmation) cursor.next());
+            list.add((Installation) cursor.next());
         }
         return list;
     }
 
     @Override
-    public Confirmation get(ObjectId id) {
-        return confirmations().findOne(id).as(Confirmation.class);
+    public Installation get(ObjectId id) {
+        return installations().findOne(id).as(Installation.class);
     }
 
     @Override
@@ -60,39 +60,39 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     }
 
     @Override
-    public WriteResult insert(Confirmation data) {
-        return confirmations().save(data);
+    public WriteResult insert(Installation data) {
+        return installations().save(data);
     }
 
     @Override
-    public WriteResult delete(Confirmation data) {
-        return confirmations().remove(data.getId());
+    public WriteResult delete(Installation data) {
+        return installations().remove(data.getId());
     }
 
     @Override
     public WriteResult delete(ObjectId id) {
-        return confirmations().remove(id);
+        return installations().remove(id);
     }
 
     @Override
-    public Confirmation getByUserId(String userId) {
-        return confirmations()
+    public Installation getByUserId(String userId) {
+        return installations()
                 .findOne("{user.id: #}", userId)
-                .as(Confirmation.class);
+                .as(Installation.class);
     }
 
     @Override
-    public Confirmation getByUserEmail(String email) {
-        return confirmations()
+    public Installation getByUserEmail(String email) {
+        return installations()
                 .findOne("{user.email: #}", email)
-                .as(Confirmation.class);
+                .as(Installation.class);
     }
 
     @Override
-    public Confirmation getByUserAndInstallation(String userId, String installationId) {
-        return confirmations()
+    public Installation getByUserAndInstallation(String userId, String installationId) {
+        return installations()
                 .findOne("{$and: [{user.id: #}, {installationId: #}]}", userId, installationId)
-                .as(Confirmation.class);
+                .as(Installation.class);
     }
 
     @Override
@@ -103,9 +103,9 @@ public class ConfirmationDaoImpl implements ConfirmationDao {
     }
 
     @Override
-    public Optional<Confirmation> getByInstallationId(String installationId) {
-        return Optional.ofNullable(confirmations()
+    public Optional<Installation> getByInstallationId(String installationId) {
+        return Optional.ofNullable(installations()
                 .findOne("{installationId: #}", installationId)
-                .as(Confirmation.class));
+                .as(Installation.class));
     }
 }

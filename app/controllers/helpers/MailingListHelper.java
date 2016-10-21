@@ -2,7 +2,7 @@ package controllers.helpers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import models.Confirmation;
+import models.Installation;
 import models.MailingList;
 import play.Logger;
 import play.libs.Json;
@@ -35,58 +35,58 @@ public final class MailingListHelper {
         this.ws = ws;
     }
 
-    public CompletionStage<Result> getMailingListsAsJson(Confirmation confirmation) {
-        return request(confirmation).get()
-                .thenApply(wsResponse -> getListsForJson(wsResponse, confirmation));
+    public CompletionStage<Result> getMailingListsAsJson(Installation installation) {
+        return request(installation).get()
+                .thenApply(wsResponse -> getListsForJson(wsResponse, installation));
     }
 
-    public CompletionStage<Result> getMailingListsAsHTML(Confirmation confirmation) {
-        return request(confirmation).get()
-                .thenApply(wsResponse -> getListsForHTML(wsResponse, confirmation));
+    public CompletionStage<Result> getMailingListsAsHTML(Installation installation) {
+        return request(installation).get()
+                .thenApply(wsResponse -> getListsForHTML(wsResponse, installation));
     }
 
-    private WSRequest request(Confirmation confirmation) {
-        return ws.url(confirmation.getMetadata().getApiEndpoint() + "/3.0/lists")
+    private WSRequest request(Installation installation) {
+        return ws.url(installation.getMetadata().getApiEndpoint() + "/3.0/lists")
                 .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
                 .setHeader(Http.HeaderNames.CONTENT_TYPE, Http.MimeTypes.JSON)
-                .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + confirmation.getAccessToken());
+                .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + installation.getAccessToken());
     }
 
 
-    private Result getListsForJson(WSResponse wsResponse, Confirmation confirmation) {
-        log.debug("Getting mailing lists for confirmation {} was a success", confirmation.getId().toString());
+    private Result getListsForJson(WSResponse wsResponse, Installation installation) {
+        log.debug("Getting mailing lists for installation {} was a success", installation.getId().toString());
         List<MailingList> lists = getMailingLists(wsResponse);
         if (lists.isEmpty()) {
-            log.debug("Received empty mailing list for confirmation {}", confirmation.getId().toString());
+            log.debug("Received empty mailing list for installation {}", installation.getId().toString());
             return ok(Json.newArray());
         } else {
             ArrayNode array = Json.newArray();
             lists.forEach(mailingList -> array.add(
                     Json.newObject().put("key", mailingList.getId()).put("value", mailingList.getName())));
-            String selectedId = getSelectedValue(confirmation);
+            String selectedId = getSelectedValue(installation);
             log.debug("Returning {} items with default as {}", array.size(), selectedId);
             return ok(Json.newObject().put("default", selectedId).set("values", array));
         }
     }
 
-    private Result getListsForHTML(WSResponse wsResponse, Confirmation confirmation) {
-        log.debug("Getting mailing lists for confirmation {} was a success", confirmation.getId().toString());
+    private Result getListsForHTML(WSResponse wsResponse, Installation installation) {
+        log.debug("Getting mailing lists for installation {} was a success", installation.getId().toString());
         List<MailingList> lists = getMailingLists(wsResponse);
         if (lists.isEmpty()) {
-            log.debug("Received empty mailing list for confirmation {}", confirmation.getId().toString());
-            return ok(views.html.lists.render(lists, "", confirmation.getId().toString()));
+            log.debug("Received empty mailing list for installation {}", installation.getId().toString());
+            return ok(views.html.lists.render(lists, "", installation.getId().toString()));
         } else {
-            String selectedId = getSelectedValue(confirmation);
+            String selectedId = getSelectedValue(installation);
             log.debug("Rendering view with {} items in list and selected item is '{}'", lists.size(), selectedId);
-            return ok(views.html.lists.render(lists, selectedId, confirmation.getId().toString()));
+            return ok(views.html.lists.render(lists, selectedId, installation.getId().toString()));
         }
     }
 
-    private String getSelectedValue(Confirmation confirmation) {
-        MailingList list = confirmation.getList();
+    private String getSelectedValue(Installation installation) {
+        MailingList list = installation.getList();
         String selectedId = "";
         if (null != list) {
-            selectedId = confirmation.getList().getId();
+            selectedId = installation.getList().getId();
         }
         return selectedId;
     }

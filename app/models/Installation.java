@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * @author rishabh
  */
-public class Confirmation extends BaseModel {
+public class Installation extends BaseModel {
 
     private String installationId;
     private User user;
@@ -75,7 +75,7 @@ public class Confirmation extends BaseModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Confirmation that = (Confirmation) o;
+        Installation that = (Installation) o;
         return Objects.equals(installationId, that.installationId) &&
                 Objects.equals(user, that.user) &&
                 Objects.equals(oauthCode, that.oauthCode) &&
@@ -91,7 +91,7 @@ public class Confirmation extends BaseModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Confirmation{");
+        final StringBuilder sb = new StringBuilder("Installation{");
         sb.append("installationId='").append(installationId).append('\'');
         sb.append(", user=").append(user);
         sb.append(", oauthCode='").append(oauthCode).append('\'');

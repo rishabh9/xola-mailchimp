@@ -3,8 +3,8 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -27,12 +27,12 @@ public class InstallationController extends Controller {
 
     private final Logger.ALogger log = Logger.of(InstallationController.class);
 
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
     private final MessagesApi messagesApi;
 
     @Inject
-    public InstallationController(ConfirmationDao confirmationDao, MessagesApi messagesApi) {
-        this.confirmationDao = confirmationDao;
+    public InstallationController(InstallationDao installationDao, MessagesApi messagesApi) {
+        this.installationDao = installationDao;
         this.messagesApi = messagesApi;
     }
 
@@ -41,42 +41,42 @@ public class InstallationController extends Controller {
         log.info("Received installation request...");
         Messages messages = messagesApi.preferred(request());
         JsonNode json = request().body().asJson();
-        Confirmation confirmation;
+        Installation installation;
         try {
-            confirmation = Json.fromJson(json, Confirmation.class);
-            log.debug("Received confirmation: {}", confirmation.toString());
+            installation = Json.fromJson(json, Installation.class);
+            log.debug("Received installation: {}", installation.toString());
         } catch (Exception e) {
-            log.error("Error in parsing the confirmation data!", e);
+            log.error("Error in parsing the installation data!", e);
             log.error("Received the following data: {}", json.toString());
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
         }
-        if (isInvalid(confirmation)) {
+        if (isInvalid(installation)) {
             log.debug("Received invalid json in request - {}", json.toString());
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
         }
-        String userId = confirmation.getUser().getId();
-        Confirmation existingConfirmation = confirmationDao.getByUserId(userId);
-        if (null != existingConfirmation) {
+        String userId = installation.getUser().getId();
+        Installation existingInstallation = installationDao.getByUserId(userId);
+        if (null != existingInstallation) {
             log.debug("Found an existing entry for user {}", userId);
-            copyOverData(confirmation, existingConfirmation);
+            copyOverData(installation, existingInstallation);
         } else {
             log.debug("Brand new user {}!", userId);
-            existingConfirmation = confirmation;
+            existingInstallation = installation;
         }
-        WriteResult result = confirmationDao.insert(existingConfirmation);
+        WriteResult result = installationDao.insert(existingInstallation);
         if (result.wasAcknowledged()) {
             final String upsertedId;
             if (result.isUpdateOfExisting()) {
-                upsertedId = existingConfirmation.getId().toString();
-                log.info("Confirmation {} updated", upsertedId);
+                upsertedId = existingInstallation.getId().toString();
+                log.info("Installation {} updated", upsertedId);
                 return ok(confirmationJson(upsertedId));
             } else {
                 upsertedId = result.getUpsertedId().toString();
-                log.info("Confirmation {} created", upsertedId);
+                log.info("Installation {} created", upsertedId);
                 return created(confirmationJson(upsertedId));
             }
         } else {
-            log.error("Error while persisting confirmation. {}", result.toString());
+            log.error("Error while persisting installation. {}", result.toString());
             return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
         }
     }
@@ -87,7 +87,7 @@ public class InstallationController extends Controller {
         return json;
     }
 
-    private boolean isInvalid(Confirmation newData) {
+    private boolean isInvalid(Installation newData) {
         if (!StringUtils.hasText(newData.getInstallationId()))
             return true;
         if (null == newData.getUser())
@@ -97,7 +97,7 @@ public class InstallationController extends Controller {
         return false;
     }
 
-    private void copyOverData(Confirmation source, Confirmation destination) {
+    private void copyOverData(Installation source, Installation destination) {
         destination.setInstallationId(source.getInstallationId());
         if (null != destination.getUser()) {
             destination.getUser().setName(source.getUser().getName());

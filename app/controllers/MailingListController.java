@@ -1,8 +1,8 @@
 package controllers;
 
 import controllers.helpers.MailingListHelper;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
@@ -32,16 +32,16 @@ public class MailingListController extends Controller {
     private final Logger.ALogger log = Logger.of(MailingListController.class);
 
     private final WSClient ws;
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
     private final MessagesApi messagesApi;
     private final FormFactory formFactory;
     private final MailingListHelper helper;
 
     @Inject
-    public MailingListController(WSClient ws, ConfirmationDao confirmationDao, MessagesApi messagesApi,
+    public MailingListController(WSClient ws, InstallationDao installationDao, MessagesApi messagesApi,
                                  FormFactory formFactory, MailingListHelper helper) {
         this.ws = ws;
-        this.confirmationDao = confirmationDao;
+        this.installationDao = installationDao;
         this.messagesApi = messagesApi;
         this.formFactory = formFactory;
         this.helper = helper;
@@ -57,7 +57,7 @@ public class MailingListController extends Controller {
             return CompletableFuture.completedFuture(badRequest(Errors.toJson(BAD_REQUEST, errors)));
         }
         log.info("Requesting mailing list for installation {}", installationId);
-        Optional<Confirmation> confirmation = confirmationDao.getByInstallationId(installationId);
+        Optional<Installation> confirmation = installationDao.getByInstallationId(installationId);
         if (confirmation.isPresent()) {
             return helper.getMailingListsAsJson(confirmation.get());
         } else {
@@ -86,9 +86,9 @@ public class MailingListController extends Controller {
             confirmationId = flash("confirm");
         }
         if (StringUtils.hasText(confirmationId)) {
-            log.info("Retrieving mailing lists for confirmation {}", confirmationId);
-            Confirmation confirmation = confirmationDao.get(new ObjectId(confirmationId));
-            CompletionStage<Result> result = helper.getMailingListsAsHTML(confirmation);
+            log.info("Retrieving mailing lists for installation {}", confirmationId);
+            Installation installation = installationDao.get(new ObjectId(confirmationId));
+            CompletionStage<Result> result = helper.getMailingListsAsHTML(installation);
             return result;
         } else {
             log.error("Invalid ConfirmationId: {}", confirmationId);

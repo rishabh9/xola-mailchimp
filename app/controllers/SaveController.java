@@ -1,8 +1,8 @@
 package controllers;
 
 import com.mongodb.WriteResult;
-import daos.ConfirmationDao;
-import models.Confirmation;
+import daos.InstallationDao;
+import models.Installation;
 import models.MailingList;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
@@ -32,15 +32,15 @@ public class SaveController extends Controller {
 
     private final FormFactory formFactory;
     private final WSClient ws;
-    private final ConfirmationDao confirmationDao;
+    private final InstallationDao installationDao;
     private final Configuration configuration;
 
     @Inject
-    public SaveController(FormFactory formFactory, WSClient ws, ConfirmationDao confirmationDao,
+    public SaveController(FormFactory formFactory, WSClient ws, InstallationDao installationDao,
                           ConfigurationProvider configurationProvider) {
         this.formFactory = formFactory;
         this.ws = ws;
-        this.confirmationDao = confirmationDao;
+        this.installationDao = installationDao;
         this.configuration = configurationProvider.get();
     }
 
@@ -52,29 +52,29 @@ public class SaveController extends Controller {
         String confirmationId = requestData.get("confirm");
         log.debug("Received id: {}, name: {}, confirmationId: {}", id, name, confirmationId);
         if (!StringUtils.hasText(confirmationId)) {
-            log.error("Invalid system state. Invalid confirmation id received: '{}'", confirmationId);
+            log.error("Invalid system state. Invalid installation id received: '{}'", confirmationId);
             return CompletableFuture.completedFuture(badRequest("Invalid system state."));
         }
-        Confirmation confirmation = confirmationDao.get(new ObjectId(confirmationId));
-        MailingList list = confirmation.getList();
+        Installation installation = installationDao.get(new ObjectId(confirmationId));
+        MailingList list = installation.getList();
         if (null == list) {
             list = new MailingList();
         }
         list.setId(id);
         list.setName(name);
-        confirmation.setList(list);
-        WriteResult result = confirmationDao.insert(confirmation);
+        installation.setList(list);
+        WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
-            log.info("Plugin is setup successfully for confirmation {}", confirmationId);
-            return finalizeConfiguration(confirmation);
+            log.info("Plugin is setup successfully for installation {}", confirmationId);
+            return finalizeConfiguration(installation);
         } else {
             log.error("Error while updating the selected mailing list to db.");
             return CompletableFuture.completedFuture(internalServerError("Error saving the selection."));
         }
     }
 
-    private CompletionStage<Result> finalizeConfiguration(Confirmation confirmation) {
-        return ws.url(String.format(configuration.getString(INSTALLATION_URL), confirmation.getInstallationId()))
+    private CompletionStage<Result> finalizeConfiguration(Installation installation) {
+        return ws.url(String.format(configuration.getString(INSTALLATION_URL), installation.getInstallationId()))
                 .setHeader(API_KEY_HEADER, configuration.getString(API_KEY))
                 .put("")
                 .thenApply(wsResponse -> {
