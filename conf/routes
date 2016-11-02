@@ -6,10 +6,6 @@
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 # Prescribed by Xola Plugin Documentation.
-# API Endpoint that receives the initial user data.
-POST    /installations              controllers.InstallationController.initiateInstall()
-
-# Prescribed by Xola Plugin Documentation.
 # API Endpoint that receives data from Xola.
 # It can be either webhook data or plugin configuration.
 POST    /events                       controllers.IncomingDataController.index()

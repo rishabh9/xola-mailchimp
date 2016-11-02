@@ -1,4 +1,4 @@
-package controllers;
+package controllers.helpers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -8,39 +8,36 @@ import models.Installation;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
-import play.i18n.MessagesApi;
 import play.libs.Json;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
 import utils.Errors;
 
 import javax.inject.Inject;
 
+import static play.mvc.Http.Status.BAD_REQUEST;
+import static play.mvc.Http.Status.INTERNAL_SERVER_ERROR;
+import static play.mvc.Results.*;
 import static utils.MessageKey.INVALID_JSON;
 import static utils.MessageKey.UNEXPECTED_ERROR;
 
 /**
  * @author rishabh
  */
-public class InstallationController extends Controller {
+public class NewInstallationHelper {
 
-    private final Logger.ALogger log = Logger.of(InstallationController.class);
+    private final Logger.ALogger log = Logger.of(NewInstallationHelper.class);
 
     private final InstallationDao installationDao;
-    private final MessagesApi messagesApi;
 
     @Inject
-    public InstallationController(InstallationDao installationDao, MessagesApi messagesApi) {
+    public NewInstallationHelper(InstallationDao installationDao) {
         this.installationDao = installationDao;
-        this.messagesApi = messagesApi;
     }
 
     @BodyParser.Of(BodyParser.Json.class)
-    public Result initiateInstall() {
+    public Result initiateInstall(JsonNode json, Messages messages) {
         log.info("Received installation request...");
-        Messages messages = messagesApi.preferred(request());
-        JsonNode json = request().body().asJson();
         Installation installation;
         try {
             installation = Json.fromJson(json, Installation.class);

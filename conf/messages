@@ -8,3 +8,4 @@ invalid.param.i                     = Invalid parameter [i].
 invalid.param.u                     = Invalid parameter [u].
 missing.param.email                 = Missing parameter [customerEmail]
 missing.config                      = Missing configuration.
+not.subscribed                      = Not subscribed to the event.

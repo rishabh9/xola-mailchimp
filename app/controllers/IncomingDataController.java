@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controllers.helpers.NewInstallationHelper;
 import daos.InstallationDao;
 import models.Installation;
 import org.springframework.util.StringUtils;
@@ -16,6 +17,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import utils.Errors;
+import utils.MessageKey;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
@@ -34,12 +36,15 @@ public class IncomingDataController extends Controller {
     private final InstallationDao installationDao;
     private final WSClient ws;
     private final MessagesApi messagesApi;
+    private final NewInstallationHelper installationHelper;
 
     @Inject
-    public IncomingDataController(InstallationDao installationDao, WSClient ws, MessagesApi messagesApi) {
+    public IncomingDataController(InstallationDao installationDao, WSClient ws, MessagesApi messagesApi,
+                                  NewInstallationHelper installationHelper) {
         this.installationDao = installationDao;
         this.ws = ws;
         this.messagesApi = messagesApi;
+        this.installationHelper = installationHelper;
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -48,13 +53,33 @@ public class IncomingDataController extends Controller {
         JsonNode json = request().body().asJson();
         installationDao.dump(json.toString());
         Messages messages = messagesApi.preferred(request());
+        String event = json.findPath("eventName").textValue();
+        if (StringUtils.hasText(event)) {
+            log.debug("Received event {}", event);
+            switch (event) {
+                case "order.create":
+                case "order.update":
+                    return executeOrderEvent(json, messages);
+                case "config.update":
+                case "new.install":
+                    return complete(installationHelper.initiateInstall(json.findPath("data"), messages));
+                default:
+                    log.warn("Ignoring event {}.");
+                    return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
+            }
+        } else {
+            log.error("Missing 'eventName' tag.");
+            return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON))));
+        }
+    }
+
+    private CompletionStage<Result> executeOrderEvent(JsonNode json, Messages messages) {
         String email = json.findPath("customerEmail").textValue();
         String sellerId = json.findPath("seller").findPath("id").textValue();
         log.debug("To add email {} into mailing list of seller {}", email, sellerId);
         if (email == null) {
             log.warn("Incoming data is missing email parameter");
-            return CompletableFuture.completedFuture(
-                    badRequest(Errors.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
+            return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
         } else {
             log.debug("Making call to Mailchimp to add to mailing list");
             Installation installation = installationDao.getByUserId(sellerId);
@@ -73,7 +98,7 @@ public class IncomingDataController extends Controller {
                 });
             } else {
                 log.error("Did not find configuration for user {}", email);
-                return CompletableFuture.completedFuture(internalServerError(
+                return complete(internalServerError(
                         Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
             }
         }
@@ -82,5 +107,9 @@ public class IncomingDataController extends Controller {
     private String getUrl(Installation installation) {
         return installation.getMetadata().getApiEndpoint()
                 + "/3.0/lists/" + installation.getList().getId() + "/members";
+    }
+
+    private CompletionStage<Result> complete(Result result) {
+        return CompletableFuture.completedFuture(result);
     }
 }
