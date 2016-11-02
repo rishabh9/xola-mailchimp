@@ -14,10 +14,6 @@ POST    /installations              controllers.InstallationController.initiateI
 # It can be either webhook data or plugin configuration.
 POST    /events                       controllers.IncomingDataController.index()
 
-# Prescribed by Xola Plugin Documentation.
-# API endpoints for CRUD on plugin configuration for a specific user.
-GET     /installations/:id/config            controllers.ConfigurationController.updateConfiguration(id: String)
-PUT     /installations/:id/config            controllers.ConfigurationController.getConfiguration(id: String)
 # Retrieve the list of Subscription-Lists of the installation id
 GET     /installations/:id/field/:fid    controllers.MailingListController.getFieldData(id: String, fid: String)
 

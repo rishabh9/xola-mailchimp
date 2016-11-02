@@ -13,7 +13,6 @@ public class Installation extends BaseModel {
     private String accessToken;
     private Metadata metadata;
     private MailingList list;
-    private Configuration configuration;
 
     public String getInstallationId() {
         return installationId;
@@ -61,14 +60,6 @@ public class Installation extends BaseModel {
 
     public void setList(MailingList list) {
         this.list = list;
-    }
-
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
     }
 
     @Override

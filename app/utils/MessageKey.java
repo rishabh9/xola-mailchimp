@@ -12,5 +12,4 @@ public final class MessageKey {
     public static final String INVALID_PARAM_I = "invalid.param.i";
     public static final String MISSING_PARAM_EMAIL = "missing.param.email";
     public static final String MISSING_CONFIG = "missing.config";
-    public static final String MISSING_INSTLL_ID = "missing.installation.id";
 }
