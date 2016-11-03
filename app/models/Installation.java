@@ -1,5 +1,6 @@
 package models;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -13,6 +14,7 @@ public class Installation extends BaseModel {
     private String accessToken;
     private Metadata metadata;
     private MailingList list;
+    private List<ConfigValues> configValues;
 
     public String getInstallationId() {
         return installationId;
@@ -62,6 +64,14 @@ public class Installation extends BaseModel {
         this.list = list;
     }
 
+    public List<ConfigValues> getConfigValues() {
+        return configValues;
+    }
+
+    public void setConfigValues(List<ConfigValues> configValues) {
+        this.configValues = configValues;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,12 +82,13 @@ public class Installation extends BaseModel {
                 Objects.equals(oauthCode, that.oauthCode) &&
                 Objects.equals(accessToken, that.accessToken) &&
                 Objects.equals(metadata, that.metadata) &&
-                Objects.equals(list, that.list);
+                Objects.equals(list, that.list) &&
+                Objects.equals(configValues, that.configValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installationId, user, oauthCode, accessToken, metadata, list);
+        return Objects.hash(installationId, user, oauthCode, accessToken, metadata, list, configValues);
     }
 
     @Override
@@ -89,6 +100,7 @@ public class Installation extends BaseModel {
         sb.append(", accessToken='").append(accessToken).append('\'');
         sb.append(", metadata=").append(metadata);
         sb.append(", list=").append(list);
+        sb.append(", configuration=").append(configValues);
         sb.append('}');
         return sb.toString();
     }

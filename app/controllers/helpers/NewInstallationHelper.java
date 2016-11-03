@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 import daos.InstallationDao;
 import models.Installation;
+import models.payload.Data;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Result;
 import utils.Errors;
 
@@ -35,36 +35,25 @@ public class NewInstallationHelper {
         this.installationDao = installationDao;
     }
 
-    @BodyParser.Of(BodyParser.Json.class)
-    public Result initiateInstall(JsonNode json, Messages messages) {
+    public Result newInstall(Data data, Messages messages) {
         log.info("Received installation request...");
-        Installation installation;
-        try {
-            installation = Json.fromJson(json, Installation.class);
-            log.debug("Received installation: {}", installation.toString());
-        } catch (Exception e) {
-            log.error("Error in parsing the installation data!", e);
-            log.error("Received the following data: {}", json.toString());
+        if (isInvalid(data)) {
+            log.debug("Data object has validation errors");
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
         }
-        if (isInvalid(installation)) {
-            log.debug("Received invalid json in request - {}", json.toString());
-            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
-        }
-        String userId = installation.getUser().getId();
-        Installation existingInstallation = installationDao.getByUserId(userId);
-        if (null != existingInstallation) {
-            log.debug("Found an existing entry for user {}", userId);
-            copyOverData(installation, existingInstallation);
+        Installation installation = installationDao.getByUserId(data.getUser().getId());
+        if (null != installation) {
+            log.debug("Found an existing entry for user {}", data.getUser().getId());
+            copyOverData(data, installation);
         } else {
-            log.debug("Brand new user {}!", userId);
-            existingInstallation = installation;
+            log.debug("Brand new user {}!", data.getUser().getId());
+            installation = createInstallationFromData(data);
         }
-        WriteResult result = installationDao.insert(existingInstallation);
+        WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
             final String upsertedId;
             if (result.isUpdateOfExisting()) {
-                upsertedId = existingInstallation.getId().toString();
+                upsertedId = installation.getId().toString();
                 log.info("Installation {} updated", upsertedId);
                 return ok(confirmationJson(upsertedId));
             } else {
@@ -84,24 +73,38 @@ public class NewInstallationHelper {
         return json;
     }
 
-    private boolean isInvalid(Installation newData) {
-        if (!StringUtils.hasText(newData.getInstallationId()))
+    private boolean isInvalid(Data data) {
+        if (!StringUtils.hasText(data.getId())) {
+            log.debug("Missing installation id.");
             return true;
-        if (null == newData.getUser())
+        }
+        if (null == data.getUser()) {
+            log.debug("Missing user object.");
             return true;
-        if (!StringUtils.hasText(newData.getUser().getId()))
+        }
+        if (!StringUtils.hasText(data.getUser().getId())) {
+            log.debug("Missing user id.");
             return true;
+        }
         return false;
     }
 
-    private void copyOverData(Installation source, Installation destination) {
-        destination.setInstallationId(source.getInstallationId());
-        if (null != destination.getUser()) {
-            destination.getUser().setName(source.getUser().getName());
-            destination.getUser().setCompany(source.getUser().getCompany());
-            destination.getUser().setEmail(source.getUser().getEmail());
+    private void copyOverData(Data data, Installation installation) {
+        installation.setInstallationId(data.getId());
+        if (null != installation.getUser()) {
+            installation.getUser().setName(data.getUser().getName());
+            installation.getUser().setCompany(data.getUser().getCompany());
+            installation.getUser().setEmail(data.getUser().getEmail());
         } else {
-            destination.setUser(source.getUser());
+            installation.setUser(data.getUser());
         }
+        installation.setConfigValues(data.getConfigValues());
+    }
+
+
+    private Installation createInstallationFromData(Data data) {
+        Installation installation = new Installation();
+        copyOverData(data, installation);
+        return installation;
     }
 }

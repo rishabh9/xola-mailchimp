@@ -2,9 +2,11 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controllers.helpers.ConfigUpdateHelper;
 import controllers.helpers.NewInstallationHelper;
 import daos.InstallationDao;
 import models.Installation;
+import models.payload.Data;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -17,6 +19,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import utils.Errors;
+import utils.Event;
 import utils.MessageKey;
 
 import javax.inject.Inject;
@@ -37,14 +40,16 @@ public class IncomingDataController extends Controller {
     private final WSClient ws;
     private final MessagesApi messagesApi;
     private final NewInstallationHelper installationHelper;
+    private final ConfigUpdateHelper updateHelper;
 
     @Inject
     public IncomingDataController(InstallationDao installationDao, WSClient ws, MessagesApi messagesApi,
-                                  NewInstallationHelper installationHelper) {
+                                  NewInstallationHelper installationHelper, ConfigUpdateHelper updateHelper) {
         this.installationDao = installationDao;
         this.ws = ws;
         this.messagesApi = messagesApi;
         this.installationHelper = installationHelper;
+        this.updateHelper = updateHelper;
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -57,12 +62,14 @@ public class IncomingDataController extends Controller {
         if (StringUtils.hasText(event)) {
             log.debug("Received event {}", event);
             switch (event) {
-                case "order.create":
-                case "order.update":
+                case Event.ORDER_CREATE:
+                case Event.ORDER_UPDATE:
+                    log.debug("Order event received");
                     return executeOrderEvent(json, messages);
-                case "config.update":
-                case "new.install":
-                    return complete(installationHelper.initiateInstall(json.findPath("data"), messages));
+                case Event.CONFIG_UPDATE:
+                case Event.NEW_INSTALL:
+                    log.debug("Installation event received");
+                    return complete(executeInstallationEvents(event, json, messages));
                 default:
                     log.warn("Ignoring event {}.");
                     return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
@@ -101,6 +108,20 @@ public class IncomingDataController extends Controller {
                 return complete(internalServerError(
                         Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
             }
+        }
+    }
+
+    private Result executeInstallationEvents(String event, JsonNode json, Messages messages) {
+        try {
+            Data data = Json.fromJson(json.findPath("data"), Data.class);
+            if (event.equals(Event.NEW_INSTALL)) {
+                return installationHelper.newInstall(data, messages);
+            } else {
+                return updateHelper.updateConfiguration(data, messages);
+            }
+        } catch (Exception e) {
+            log.debug("Missing or invalid data object.");
+            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
     }
 

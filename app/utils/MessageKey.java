@@ -13,4 +13,5 @@ public final class MessageKey {
     public static final String MISSING_PARAM_EMAIL = "missing.param.email";
     public static final String MISSING_CONFIG = "missing.config";
     public static final String NOT_SUBSCRIBED = "not.subscribed";
+    public static final String MISSING_INSTALL_ID = "missing.installation.id";
 }
