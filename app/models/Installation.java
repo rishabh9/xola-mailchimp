@@ -12,7 +12,6 @@ public class Installation extends BaseModel {
     private User user;
     private String oauthCode;
     private String accessToken;
-    private MailingList list;
     private List<ConfigValues> configValues;
 
     public String getInstallationId() {
@@ -47,14 +46,6 @@ public class Installation extends BaseModel {
         this.accessToken = accessToken;
     }
 
-    public MailingList getList() {
-        return list;
-    }
-
-    public void setList(MailingList list) {
-        this.list = list;
-    }
-
     public List<ConfigValues> getConfigValues() {
         return configValues;
     }
@@ -72,13 +63,12 @@ public class Installation extends BaseModel {
                 Objects.equals(user, that.user) &&
                 Objects.equals(oauthCode, that.oauthCode) &&
                 Objects.equals(accessToken, that.accessToken) &&
-                Objects.equals(list, that.list) &&
                 Objects.equals(configValues, that.configValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installationId, user, oauthCode, accessToken, list, configValues);
+        return Objects.hash(installationId, user, oauthCode, accessToken, configValues);
     }
 
     @Override
@@ -88,7 +78,6 @@ public class Installation extends BaseModel {
         sb.append(", user=").append(user);
         sb.append(", oauthCode='").append(oauthCode).append('\'');
         sb.append(", accessToken='").append(accessToken).append('\'');
-        sb.append(", list=").append(list);
         sb.append(", configuration=").append(configValues);
         sb.append('}');
         return sb.toString();

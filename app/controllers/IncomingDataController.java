@@ -8,9 +8,11 @@ import daos.InstallationDao;
 import models.Installation;
 import models.payload.Data;
 import org.springframework.util.StringUtils;
+import play.Configuration;
 import play.Logger;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
+import play.inject.ConfigurationProvider;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -18,11 +20,10 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import utils.Errors;
-import utils.Event;
-import utils.MessageKey;
+import utils.*;
 
 import javax.inject.Inject;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -41,15 +42,20 @@ public class IncomingDataController extends Controller {
     private final MessagesApi messagesApi;
     private final NewInstallationHelper installationHelper;
     private final ConfigUpdateHelper updateHelper;
+    private final Configuration config;
+    private final InstallationUtility utility;
 
     @Inject
     public IncomingDataController(InstallationDao installationDao, WSClient ws, MessagesApi messagesApi,
-                                  NewInstallationHelper installationHelper, ConfigUpdateHelper updateHelper) {
+                                  NewInstallationHelper installationHelper, ConfigUpdateHelper updateHelper,
+                                  ConfigurationProvider configProvider, InstallationUtility utility) {
         this.installationDao = installationDao;
         this.ws = ws;
         this.messagesApi = messagesApi;
         this.installationHelper = installationHelper;
         this.updateHelper = updateHelper;
+        this.config = configProvider.get();
+        this.utility = utility;
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -90,25 +96,32 @@ public class IncomingDataController extends Controller {
         } else {
             log.debug("Making call to Mailchimp to add to mailing list");
             Installation installation = installationDao.getByUserId(sellerId);
-            if (null != installation && null != installation.getList()
-                    && StringUtils.hasText(installation.getList().getId())) {
-                WSRequest request = ws.url(getUrl(installation))
-                        .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + installation.getAccessToken())
+            Optional<String> apiKey = utility.getApiKey(installation);
+            Optional<String> configuredListId = utility.getConfiguredListId(installation);
+            if (null != installation && configuredListId.isPresent() && apiKey.isPresent()) {
+                WSRequest request = ws.url(getUrl(installation, configuredListId.get()))
+                        .setAuth("username", apiKey.get())
                         .setContentType(Http.MimeTypes.JSON);
                 ObjectNode data = Json.newObject();
                 data.put("email_address", email);
                 data.put("status", "subscribed");
                 return request.post(data).thenApply(wsResponse -> {
                     JsonNode jsonResponse = wsResponse.asJson();
-                    log.debug("Response from Mailchimp {}", jsonResponse.asText());
+                    log.debug("Response from MailChimp {}", jsonResponse.asText());
                     return ok(jsonResponse);
                 });
             } else {
-                log.error("Did not find configuration for user {}", email);
+                log.error("Did not find configuration for user {}. Couldn't connect to MailChimp.", sellerId);
                 return complete(internalServerError(
                         Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
             }
         }
+    }
+
+    private String getUrl(Installation installation, String configuredListId) {
+        return String.format(
+                config.getString(Constants.MAILCHIMP_ADD_EMAIL_URL),
+                utility.getDataCentre(installation), configuredListId);
     }
 
     private Result executeInstallationEvents(String event, JsonNode json, Messages messages) {
@@ -123,11 +136,6 @@ public class IncomingDataController extends Controller {
             log.debug("Missing or invalid data object.");
             return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
-    }
-
-    private String getUrl(Installation installation) {
-        return installation.getMetadata().getApiEndpoint()
-                + "/3.0/lists/" + installation.getList().getId() + "/members";
     }
 
     private CompletionStage<Result> complete(Result result) {

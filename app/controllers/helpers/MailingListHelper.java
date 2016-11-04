@@ -4,21 +4,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import models.Installation;
 import models.MailingList;
+import play.Configuration;
 import play.Logger;
+import play.inject.ConfigurationProvider;
 import play.libs.Json;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
 import play.mvc.Result;
+import utils.InstallationUtility;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static play.mvc.Results.ok;
+import static utils.Constants.MAILCHIMP_GET_LISTS_URL;
 
 /**
  * @author rishabh
@@ -29,66 +34,57 @@ public final class MailingListHelper {
     private final Logger.ALogger log = Logger.of(MailingListHelper.class);
 
     private final WSClient ws;
+    private final Configuration config;
+    private final InstallationUtility utility;
 
     @Inject
-    public MailingListHelper(WSClient ws) {
+    public MailingListHelper(WSClient ws, ConfigurationProvider configProvider,
+                             InstallationUtility utility) {
         this.ws = ws;
+        this.config = configProvider.get();
+        this.utility = utility;
     }
 
     public CompletionStage<Result> getMailingListsAsJson(Installation installation) {
-        return request(installation).get()
-                .thenApply(wsResponse -> getListsForJson(wsResponse, installation));
-    }
 
-    public CompletionStage<Result> getMailingListsAsHTML(Installation installation) {
-        return request(installation).get()
-                .thenApply(wsResponse -> getListsForHTML(wsResponse, installation));
+        Optional<String> apiKey = utility.getApiKey(installation);
+        Optional<String> dataCentre = utility.getDataCentre(installation);
+        if (apiKey.isPresent() && dataCentre.isPresent()) {
+            return ws.url(String.format(
+                    config.getString(MAILCHIMP_GET_LISTS_URL), dataCentre.get()))
+                    .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
+                    .setHeader(Http.HeaderNames.CONTENT_TYPE, Http.MimeTypes.JSON)
+                    .setAuth("username", apiKey.get())
+                    .get()
+                    .thenApply(wsResponse -> getListsForJson(wsResponse, installation));
+        } else {
+            return CompletableFuture.completedFuture(okResponse(Json.newArray(), ""));
+        }
     }
-
-    private WSRequest request(Installation installation) {
-        return ws.url(installation.getMetadata().getApiEndpoint() + "/3.0/lists")
-                .setHeader(Http.HeaderNames.ACCEPT, Http.MimeTypes.JSON)
-                .setHeader(Http.HeaderNames.CONTENT_TYPE, Http.MimeTypes.JSON)
-                .setHeader(Http.HeaderNames.AUTHORIZATION, "Bearer " + installation.getAccessToken());
-    }
-
 
     private Result getListsForJson(WSResponse wsResponse, Installation installation) {
         log.debug("Getting mailing lists for installation {} was a success", installation.getId().toString());
         List<MailingList> lists = getMailingLists(wsResponse);
         if (lists.isEmpty()) {
             log.debug("Received empty mailing list for installation {}", installation.getId().toString());
-            return ok(Json.newArray());
+            return okResponse(Json.newArray(), "");
         } else {
             ArrayNode array = Json.newArray();
             lists.forEach(mailingList -> array.add(
                     Json.newObject().put("key", mailingList.getId()).put("value", mailingList.getName())));
             String selectedId = getSelectedValue(installation);
             log.debug("Returning {} items with default as {}", array.size(), selectedId);
-            return ok(Json.newObject().put("default", selectedId).set("values", array));
+            return okResponse(array, selectedId);
         }
     }
 
-    private Result getListsForHTML(WSResponse wsResponse, Installation installation) {
-        log.debug("Getting mailing lists for installation {} was a success", installation.getId().toString());
-        List<MailingList> lists = getMailingLists(wsResponse);
-        if (lists.isEmpty()) {
-            log.debug("Received empty mailing list for installation {}", installation.getId().toString());
-            return ok(views.html.lists.render(lists, "", installation.getId().toString()));
-        } else {
-            String selectedId = getSelectedValue(installation);
-            log.debug("Rendering view with {} items in list and selected item is '{}'", lists.size(), selectedId);
-            return ok(views.html.lists.render(lists, selectedId, installation.getId().toString()));
-        }
+    private Result okResponse(ArrayNode array, String selectedId) {
+        return ok(Json.newObject().put("default", selectedId).set("values", array));
     }
 
     private String getSelectedValue(Installation installation) {
-        MailingList list = installation.getList();
-        String selectedId = "";
-        if (null != list) {
-            selectedId = installation.getList().getId();
-        }
-        return selectedId;
+        Optional<String> configuredListId = utility.getConfiguredListId(installation);
+        return configuredListId.isPresent() ? configuredListId.get() : "";
     }
 
     private List<MailingList> getMailingLists(WSResponse wsResponse) {

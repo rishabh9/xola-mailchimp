@@ -1,15 +1,17 @@
 package controllers.helpers;
 
 import models.Installation;
-import org.springframework.util.StringUtils;
 import play.Configuration;
 import play.Logger;
+import play.inject.ConfigurationProvider;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
+import utils.Constants;
+import utils.InstallationUtility;
 
 import javax.inject.Inject;
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -25,11 +27,14 @@ public class MailchimpKeyVerifier {
 
     private final WSClient ws;
     private final Configuration appConfig;
+    private final InstallationUtility utility;
 
     @Inject
-    public MailchimpKeyVerifier(WSClient ws, Configuration appConfig) {
+    public MailchimpKeyVerifier(WSClient ws, ConfigurationProvider configProvider,
+                                InstallationUtility utility) {
         this.ws = ws;
-        this.appConfig = appConfig;
+        this.appConfig = configProvider.get();
+        this.utility = utility;
     }
 
     /**
@@ -41,44 +46,33 @@ public class MailchimpKeyVerifier {
     boolean verifyAndCompleteInstallation(Installation installation) {
 
         // Verify the configuration has 'mc-api-key'
-        if (null == installation.getConfigValues() || installation.getConfigValues().isEmpty()) {
-            // If not present, fail silently. Do not make complete call.
-            log.debug("Configuration is missing or empty.");
+        Optional<String> apiKey = utility.getApiKey(installation);
+        Optional<String> dataCentre = utility.getDataCentre(installation);
+        if (apiKey.isPresent() && dataCentre.isPresent()) {
+            verifyApiKey(installation, apiKey.get(), dataCentre.get())
+                    .whenComplete((wsResponse, throwable) -> {
+                        if (null != throwable) {
+                            log.error("Error talking to Mailchimp API", throwable);
+                        }
+                        if (null != wsResponse && wsResponse.getStatus() == Http.Status.OK) {
+                            completeInstallation(installation);
+                        }
+                    });
         } else {
-            installation.getConfigValues().forEach(config -> {
-                if (config.getKey().equals("mc-api-key")) {
-                    // Make complete call to App store.
-                    verifyApiKey(installation, config.getValue())
-                            .whenComplete((wsResponse, throwable) -> {
-                                if (null != throwable) {
-                                    log.error("Error talking to Mailchimp API", throwable);
-                                }
-                                if (null != wsResponse && wsResponse.getStatus() == Http.Status.OK) {
-                                    completeInstallation(installation);
-                                }
-                            });
-                }
-            });
+            log.warn("Inconsistent data ApiKey present? {}, DataCentre present? {}",
+                    apiKey.isPresent(), dataCentre.isPresent());
         }
         return true;
     }
 
-    private CompletionStage<WSResponse> verifyApiKey(Installation installation, String apiKey) {
+    private CompletionStage<WSResponse> verifyApiKey(Installation installation, String apiKey, String dataCentre) {
         log.info("Verifying API key {} for installation {}", apiKey, installation.getId().toHexString());
-        if (StringUtils.hasText(apiKey)) {
-            String[] meta = apiKey.split("-");
-            if (null != meta && meta.length == 2) {
-                return ws.url(String.format(appConfig.getString("mailchimp.verify.url"), meta[1]))
-                        .setAuth("username", meta[0])
-                        .get();
-            } else {
-                log.warn("The API key '{}' doesn't have key and data center information. Cannot proceed.", apiKey);
-                return CompletableFuture.completedFuture(null);
-            }
-        } else {
-            log.warn("The API key is empty! Cannot proceed.");
-            return CompletableFuture.completedFuture(null);
-        }
+        return ws.url(
+                String.format(
+                        appConfig.getString(Constants.MAILCHIMP_VERIFY_URL),
+                        dataCentre))
+                .setAuth("username", apiKey)
+                .get();
     }
 
     private CompletionStage<WSResponse> completeInstallation(Installation installation) {
