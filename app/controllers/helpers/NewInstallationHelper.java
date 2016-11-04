@@ -1,11 +1,10 @@
 package controllers.helpers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 import daos.InstallationDao;
 import models.Installation;
 import models.payload.Data;
+import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -14,6 +13,7 @@ import play.mvc.Result;
 import utils.Errors;
 
 import javax.inject.Inject;
+import java.util.concurrent.CompletableFuture;
 
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.INTERNAL_SERVER_ERROR;
@@ -29,10 +29,12 @@ public class NewInstallationHelper {
     private final Logger.ALogger log = Logger.of(NewInstallationHelper.class);
 
     private final InstallationDao installationDao;
+    private final MailchimpKeyVerifier verifier;
 
     @Inject
-    public NewInstallationHelper(InstallationDao installationDao) {
+    public NewInstallationHelper(InstallationDao installationDao, MailchimpKeyVerifier verifier) {
         this.installationDao = installationDao;
+        this.verifier = verifier;
     }
 
     public Result newInstall(Data data, Messages messages) {
@@ -51,26 +53,19 @@ public class NewInstallationHelper {
         }
         WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
-            final String upsertedId;
+            Installation inst = installationDao.get((ObjectId) result.getUpsertedId());
+            CompletableFuture.supplyAsync(() -> verifier.verifyAndCompleteInstallation(inst));
             if (result.isUpdateOfExisting()) {
-                upsertedId = installation.getId().toString();
-                log.info("Installation {} updated", upsertedId);
-                return ok(confirmationJson(upsertedId));
+                log.info("Installation {} updated", result.getUpsertedId().toString());
+                return ok(Json.toJson(inst));
             } else {
-                upsertedId = result.getUpsertedId().toString();
-                log.info("Installation {} created", upsertedId);
-                return created(confirmationJson(upsertedId));
+                log.info("Installation {} created", result.getUpsertedId().toString());
+                return created(Json.toJson(inst));
             }
         } else {
             log.error("Error while persisting installation. {}", result.toString());
             return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
         }
-    }
-
-    private JsonNode confirmationJson(String upsertedId) {
-        ObjectNode json = Json.newObject();
-        json.put("id", upsertedId);
-        return json;
     }
 
     private boolean isInvalid(Data data) {
