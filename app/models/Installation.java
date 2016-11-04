@@ -12,7 +12,6 @@ public class Installation extends BaseModel {
     private User user;
     private String oauthCode;
     private String accessToken;
-    private Metadata metadata;
     private MailingList list;
     private List<ConfigValues> configValues;
 
@@ -48,14 +47,6 @@ public class Installation extends BaseModel {
         this.accessToken = accessToken;
     }
 
-    public Metadata getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Metadata metadata) {
-        this.metadata = metadata;
-    }
-
     public MailingList getList() {
         return list;
     }
@@ -81,14 +72,13 @@ public class Installation extends BaseModel {
                 Objects.equals(user, that.user) &&
                 Objects.equals(oauthCode, that.oauthCode) &&
                 Objects.equals(accessToken, that.accessToken) &&
-                Objects.equals(metadata, that.metadata) &&
                 Objects.equals(list, that.list) &&
                 Objects.equals(configValues, that.configValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installationId, user, oauthCode, accessToken, metadata, list, configValues);
+        return Objects.hash(installationId, user, oauthCode, accessToken, list, configValues);
     }
 
     @Override
@@ -98,7 +88,6 @@ public class Installation extends BaseModel {
         sb.append(", user=").append(user);
         sb.append(", oauthCode='").append(oauthCode).append('\'');
         sb.append(", accessToken='").append(accessToken).append('\'');
-        sb.append(", metadata=").append(metadata);
         sb.append(", list=").append(list);
         sb.append(", configuration=").append(configValues);
         sb.append('}');

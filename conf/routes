@@ -13,10 +13,6 @@ POST    /events                       controllers.IncomingDataController.index()
 # Retrieve the list of Subscription-Lists of the installation id
 GET     /installations/:id/field/:fid    controllers.MailingListController.getFieldData(id: String, fid: String)
 
-# The Redirect URL. Xola redirect to this URL. It initiates the Mailchimp OAuth process.
-POST    /oauth/init                 controllers.OAuthController.initiate()
-# The URL Mailchimp redirects to after completing the OAuth process
-GET     /oauth/finish               controllers.OAuthController.complete()
 # Display the list of Subscriptions List of the user
 GET     /lists                      controllers.MailingListController.index()
 # Save the selected subscription list
