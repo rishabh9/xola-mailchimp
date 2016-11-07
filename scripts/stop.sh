@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-echo "Stopping Legolas..."
-kill `cat ../RUNNING_PID`
+echo "Stopping Mailchimp..."
+kill `cat /var/xola/mailchimp/RUNNING_PID`

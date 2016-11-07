@@ -146,12 +146,12 @@ source ~/.bashrc
 ###############################################
 # Install MongDB
 ###############################################
-# echo "Download MongoDB..."
-# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-# echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-# sudo apt-get update
-# sudo apt-get -y install mongodb-org
-# echo "MongDB done."
+echo "Download MongoDB..."
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+sudo apt-get update
+sudo apt-get -y install mongodb-org
+echo "MongoDB done."
 
 ###############################################
 # Reset bash
@@ -161,8 +161,52 @@ source ~/.bashrc
 ###############################################
 # Create deployment folders
 ###############################################
-mkdir -p /var/xola/plugins/mailchimp/conf
-mkdir -p /var/log/xola
+sudo mkdir -p /var/xola/plugins/mailchimp/conf
+sudo mkdir -p /var/log/xola
+
+###############################################
+# Build & deploy Mailchimp
+###############################################
+cd /vagrant/
+/home/vagrant/activator-dist-$activatorVersion/bin/activator clean compile universal:packageZipTarball
+sudo tar -xf /vagrant/target/universal/mailchimp-*.tgz -C /var/xola/mailchimp --strip-components 1
+sudo cp /vagrant/conf/application-vagrant.conf /var/xola/mailchimp/conf/application-vagrant.conf
+sudo cp /vagrant/conf/logback-vagrant.xml /var/xola/mailchimp/conf/logback-vagrant.xml
+export key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)
+sudo sed -i "s/.*play.crypto.*/play.crypto.secret = \"${key}\"/" /var/xola/mailchimp/conf/application-vagrant.conf
+
+# Just ensuring the start up script is idiot safe
+sudo sed -i 's/application.conf/application-vagrant.conf/' /var/xola/mailchimp/bin/start.sh
+sudo sed -i 's/application-test.conf/application-vagrant.conf/' /var/xola/mailchimp/bin/start.sh
+sudo sed -i 's/application-prod.conf/application-vagrant.conf/' /var/xola/mailchimp/bin/start.sh
+sudo sed -i 's/logback.xml/logback-vagrant.xml/' /var/xola/mailchimp/bin/start.sh
+sudo sed -i 's/logback-test.xml/logback-vagrant.xml/' /var/xola/mailchimp/bin/start.sh
+sudo sed -i 's/logback-prod.xml/logback-vagrant.xml/' /var/xola/mailchimp/bin/start.sh
+
+sudo sed -i 's/logback-prod.xml/logback-vagrant.xml/' /var/xola/mailchimp/bin/start.sh
+
+###############################################
+# Configure Mailchimp as a service
+###############################################
+
+sudo update-rc.d -f mailchimp remove
+sudo cp /vagrant/mailchimp.init /etc/init.d/mailchimp
+sudo chmod a+x /etc/init.d/mailchimp
+sudo update-rc.d mailchimp defaults
+
+sudo service mailchimp restart
+
+###############################################
+# Configure Hostname ans Hosts file
+###############################################
+
+sudo hostname mailchimp
+sudo sh -c "echo 'mailchimp' > /etc/hostname"
+
+sudo sh -c "echo '' >> /etc/hosts"
+sudo sh -c "echo '10.10.10.10    xola.local xola.dev' >> /etc/hosts"
+sudo sh -c "echo '10.10.10.12    legolas.local legolas.dev' >> /etc/hosts"
+sudo sh -c "echo '' >> /etc/hosts"
 
 ###############################################
 # Show installation summary
@@ -181,21 +225,21 @@ echo " "
 echo "NPM version"
 npm -v
 echo " "
-echo "CoffeeScript version:"
-coffee -v
-echo " "
-echo "Bower version:"
-bower -v
-echo " "
-echo "Sass version:"
-sass -v
-echo " "
-echo "Redis version"
-redis-server -v
-echo " "
-echo "PostgreSQL version"
-psql --version
-echo " "
+# echo "CoffeeScript version:"
+# coffee -v
+# echo " "
+# echo "Bower version:"
+# bower -v
+# echo " "
+# echo "Sass version:"
+# sass -v
+# echo " "
+# echo "Redis version"
+# redis-server -v
+# echo " "
+# echo "PostgreSQL version"
+# psql --version
+# echo " "
 echo "mongoDB version"
 mongod --version
 echo " "
