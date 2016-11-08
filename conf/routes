@@ -3,14 +3,14 @@
 # ~~~~
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file   controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /           controllers.HomeController.index(message: String)
+GET     /               controllers.HomeController.index()
 
 # Prescribed by Xola Plugin Documentation.
 # API Endpoint that receives data from Xola.
 # It can be either webhook data or plugin configuration.
-POST    /events     controllers.IncomingDataController.index()
+POST    /events         controllers.IncomingDataController.index()
 
 # Retrieve the list of Subscription-Lists for the installation id
-GET     /lists      controllers.MailingListController.getLists()
+GET     /lists          controllers.MailingListController.getLists()

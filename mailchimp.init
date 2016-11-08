@@ -10,7 +10,7 @@
 #
 ### END INIT INFO
 
-MAILCHIMP_DIR=/var/xola/mailchimp
+MAILCHIMP_DIR=/var/xola/plugins/mailchimp
 
 case "$1" in
  start)

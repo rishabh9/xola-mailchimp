@@ -9,7 +9,7 @@ import utils.Constants;
  */
 public class HomeController extends Controller {
 
-    public Result index(String message) {
+    public Result index() {
         return ok(Constants.UP_AND_RUNNING);
     }
 }
