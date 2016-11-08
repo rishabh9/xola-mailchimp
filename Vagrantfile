@@ -27,7 +27,6 @@ Vagrant.configure(2) do |config|
       config.cache.scope = :box
   end
 
-  config.vm.define "mailchimp"
   # config.vm.define "mailchimp" do |mailchimp|
   # end
 
@@ -60,6 +59,8 @@ Vagrant.configure(2) do |config|
   # Bridged networks make the machine appear as another physical device on
   # your network.
   # config.vm.network :public_network
+
+  config.vm.hostname = "mailchimp"
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
