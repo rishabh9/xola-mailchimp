@@ -14,6 +14,8 @@ Vagrant.configure(2) do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "ubuntu/trusty64"
 
+  config.vm.box_check_update = false
+
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # http://www.vagrantbox.es/
@@ -25,6 +27,7 @@ Vagrant.configure(2) do |config|
       config.cache.scope = :box
   end
 
+  config.vm.define "mailchimp"
   # config.vm.define "mailchimp" do |mailchimp|
   # end
 
@@ -47,6 +50,7 @@ Vagrant.configure(2) do |config|
   config.vm.network :forwarded_port, guest: 9000, host: 9013, id: "play"
   config.vm.network :forwarded_port, guest: 9999, host: 9913, id: "debug"
   config.vm.network :forwarded_port, guest: 22,   host: 2213, id: "ssh"
+  config.vm.network :forwarded_port, guest: 27017,   host: 27013, id: "mongodb"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.

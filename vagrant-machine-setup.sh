@@ -12,25 +12,25 @@ echo "=========================================="
 echo "Provision VM START"
 echo "=========================================="
 
-###3### sudo apt-get update
+sudo apt-get update
 
 ###############################################
 # install prerequisits
 ###############################################
-###3### sudo apt-get -y -q upgrade
-###3### sudo add-apt-repository ppa:webupd8team/java
-###3### sudo apt-get -y -q update
-###3### sudo apt-get -y -q install software-properties-common htop
-###3### sudo apt-get -y -q install build-essential
-###3### sudo apt-get -y -q install tcl8.5
+sudo apt-get -y -q upgrade
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get -y -q update
+sudo apt-get -y -q install software-properties-common htop
+sudo apt-get -y -q install build-essential
+sudo apt-get -y -q install tcl8.5
 
 ###############################################
 # Install Java 8
 ###############################################
 # sudo apt-get install -y openjdk-8-jdk
-###3### echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-###3### sudo apt-get -y -q install oracle-java8-installer
-###3### sudo update-java-alternatives -s java-8-oracle
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+sudo apt-get -y -q install oracle-java8-installer
+sudo update-java-alternatives -s java-8-oracle
 
 ###############################################
 # In case you need Java 7
@@ -59,21 +59,21 @@ git config --global user.name "$name"
 ###############################################
 # Install Unzip
 ###############################################
-###3### sudo apt-get -y install unzip
+sudo apt-get -y install unzip
 
 ###############################################
 # Install NodeJS
 ###############################################
-###3### curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
-###3### sudo apt-get -y install nodejs
-###3### ln -s /usr/bin/nodejs /user/bin/node
+curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
+sudo apt-get -y install nodejs
+ln -s /usr/bin/nodejs /user/bin/node
 # Add node_modules to environment variables
-###3### echo "export NODE_PATH=/usr/local/lib/node_modules" >> ~/.bashrc
+echo "export NODE_PATH=/usr/local/lib/node_modules" >> ~/.bashrc
 
 ###############################################
 # Install NPM
 ###############################################
-###3### sudo apt-get -y install npm
+sudo apt-get -y install npm
 
 ###############################################
 # Install CoffeeScript
@@ -115,60 +115,61 @@ git config --global user.name "$name"
 ###############################################
 # Install SBT
 ###############################################
-###3### echo "Download SBT..."
-###3### wget http://dl.bintray.com/sbt/debian/sbt-$sbtVersion.deb
-###3### sudo dpkg -i sbt-$sbtVersion.deb
-###3### sudo apt-get update
-###3### sudo apt-get install sbt
-###3### rm sbt-$sbtVersion.deb
+echo "Download SBT..."
+wget http://dl.bintray.com/sbt/debian/sbt-$sbtVersion.deb
+sudo dpkg -i sbt-$sbtVersion.deb
+sudo apt-get update
+sudo apt-get install sbt
+rm sbt-$sbtVersion.deb
 
-###3### echo "SBT done."
+echo "SBT done."
 # Use node as default JavaScript Engine
-###3### echo "export SBT_OPTS=\"\$SBT_OPTS -Dsbt.jse.engineType=Node\"" >> ~/.bashrc
+echo "export SBT_OPTS=\"\$SBT_OPTS -Dsbt.jse.engineType=Node\"" >> ~/.bashrc
 
 ###############################################
 # Install typesafe activator
 ###############################################
-###3### cd /home/vagrant
-###3### echo "Download Typesafe Activator..."
-###3### wget http://downloads.typesafe.com/typesafe-activator/$activatorVersion/typesafe-activator-$activatorVersion.zip
-###3### unzip -d /home/vagrant typesafe-activator-$activatorVersion.zip
-###3### rm typesafe-activator-$activatorVersion.zip
-###3### echo "Typesafe Activator done."
+cd /home/vagrant
+echo "Download Typesafe Activator..."
+wget http://downloads.typesafe.com/typesafe-activator/$activatorVersion/typesafe-activator-$activatorVersion.zip
+unzip -d /home/vagrant typesafe-activator-$activatorVersion.zip
+rm typesafe-activator-$activatorVersion.zip
+echo "Typesafe Activator done."
 # Add activator to environment variables
-###3### echo "export PATH=/home/vagrant/activator-dist-$activatorVersion/bin:\$PATH" >> ~/.bashrc
+echo "export PATH=/home/vagrant/activator-dist-$activatorVersion/bin:\$PATH" >> ~/.bashrc
 
 ###############################################
 # Reset bash
 ###############################################
-###3### source ~/.bashrc
+source ~/.bashrc
 
 ###############################################
 # Install MongDB
 ###############################################
-###3### echo "Download MongoDB..."
-###3### sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-###3### echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-###3### sudo apt-get update
-###3### sudo apt-get -y install mongodb-org
-###3### echo "MongoDB done."
+echo "Download MongoDB..."
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+sudo apt-get update
+sudo apt-get -y install mongodb-org
+sudo sed -i "s/.*  bindIp: 127.0.0.1.*/# bindIp: 127.0.0.1/" /etc/mongod.conf
+echo "MongoDB done."
 
 ###############################################
 # Reset bash
 ###############################################
-###3### source ~/.bashrc
+source ~/.bashrc
 
 ###############################################
 # Create deployment folders
 ###############################################
-###3### sudo mkdir -p /var/xola/plugins/mailchimp/conf
-###3### sudo mkdir -p /var/log/xola
+sudo mkdir -p /var/xola/plugins/mailchimp/conf
+sudo mkdir -p /var/log/xola
 
 ###############################################
 # Build & deploy Mailchimp
 ###############################################
 cd /vagrant/
-###3### /home/vagrant/activator-dist-$activatorVersion/bin/activator clean compile universal:packageZipTarball
+/home/vagrant/activator-dist-$activatorVersion/bin/activator clean compile universal:packageZipTarball
 sudo tar -xf /vagrant/target/universal/xola-mailchimp-*.tgz -C /var/xola/plugins/mailchimp --strip-components 1
 sudo cp /vagrant/conf/application-vagrant.conf /var/xola/plugins/mailchimp/conf/application-vagrant.conf
 sudo cp /vagrant/conf/logback-vagrant.xml /var/xola/plugins/mailchimp/conf/logback-vagrant.xml
@@ -198,13 +199,13 @@ sudo service mailchimp restart
 # Configure Hostname ans Hosts file
 ###############################################
 
-###3### sudo hostname mailchimp
-###3### sudo sh -c "echo 'mailchimp' > /etc/hostname"
+sudo hostname mailchimp
+sudo sh -c "echo 'mailchimp' > /etc/hostname"
 
-###3### sudo sh -c "echo '' >> /etc/hosts"
-###3### sudo sh -c "echo '10.10.10.10    xola.local xola.dev' >> /etc/hosts"
-###3### sudo sh -c "echo '10.10.10.12    legolas.local legolas.dev' >> /etc/hosts"
-###3### sudo sh -c "echo '' >> /etc/hosts"
+sudo sh -c "echo '' >> /etc/hosts"
+sudo sh -c "echo '10.10.10.10    xola.local xola.dev' >> /etc/hosts"
+sudo sh -c "echo '10.10.10.12    legolas.local legolas.dev' >> /etc/hosts"
+sudo sh -c "echo '' >> /etc/hosts"
 
 ###############################################
 # Show installation summary
