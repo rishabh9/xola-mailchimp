@@ -72,8 +72,8 @@ public class IncomingDataController extends Controller {
                 case Event.ORDER_UPDATE:
                     log.debug("Order event received");
                     return executeOrderEvent(json, messages);
-                case Event.CONFIG_UPDATE:
-                case Event.NEW_INSTALL:
+                case Event.PLUGIN_CONFIG_UPDATE:
+                case Event.PLUGIN_INSTALL:
                     log.debug("Installation event received");
                     return complete(executeInstallationEvents(event, json, messages));
                 default:
@@ -127,7 +127,7 @@ public class IncomingDataController extends Controller {
     private Result executeInstallationEvents(String event, JsonNode json, Messages messages) {
         try {
             Data data = Json.fromJson(json.findPath("data"), Data.class);
-            if (event.equals(Event.NEW_INSTALL)) {
+            if (event.equals(Event.PLUGIN_INSTALL)) {
                 return installationHelper.newInstall(data, messages);
             } else {
                 return updateHelper.updateConfiguration(data, messages);

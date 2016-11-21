@@ -15,7 +15,8 @@ public final class Event {
     public static final String USER_AGENT_REMOVE = "user.agent.remove";
     public static final String USER_AGENT_UPDATE = "user.agent.update";
     public static final String USER_UPDATE = "user.update";
-    public static final String NEW_INSTALL = "new.install";
-    public static final String CONFIG_UPDATE = "config.update";
+    public static final String PLUGIN_INSTALL = "plugin.install";
+    public static final String PLUGIN_CONFIG_UPDATE = "plugin.config.update";
+    public static final String PLUGIN_UNINSTALL = "plugin.uninstall";
 
 }
