@@ -1,4 +1,4 @@
-import ReleaseTransformations._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 name := """xola-mailchimp"""
 
@@ -9,9 +9,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava, DebianPlugin)
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
   cache,
-  javaWs
+  javaWs,
+  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
+  "org.mockito" % "mockito-core" % "1.10.19" % "test",
+  "org.powermock" % "powermock-module-junit4" % "1.6.6" % "test",
+  "org.powermock" % "powermock-api-mockito" % "1.6.6" % "test",
+  "com.github.tomakehurst" % "wiremock" % "2.3.1" % "test"
 )
 
 PlayKeys.externalizeResources := false
