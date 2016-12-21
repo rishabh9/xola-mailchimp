@@ -19,4 +19,5 @@ public final class MessageKey {
     public static final String MC_API_KEY_INVALID = "invalid.mc.api.key";
     public static final String VALIDATION_ERRORS = "validation.errors";
     public static final String VALIDATIONS_PASSED = "validations.passed";
+    public static final String CONFIG_UPDATED = "config.updated";
 }

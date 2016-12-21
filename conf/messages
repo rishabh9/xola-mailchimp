@@ -15,3 +15,4 @@ mc.api.key.not.provided             = Mailchimp API key is not provided.
 invalid.mc.api.key                  = Invalid Mailchimp API key provided.
 validation.errors                   = There are validation errors.
 validations.passed                  = All validations passed!
+config.updated                      = Configuration successfully updated.
