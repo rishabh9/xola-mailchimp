@@ -1,6 +1,5 @@
 package utils;
 
-import models.ConfigValues;
 import models.Installation;
 import org.springframework.util.StringUtils;
 
@@ -13,21 +12,22 @@ import static utils.Constants.CONFIG_MC_LIST_ID;
 /**
  * @author rishabh
  */
+@Deprecated
 @Singleton
 public class InstallationUtility {
 
     public Optional<String> getValue(Installation installation, String key) {
         if (null == installation
-                || null == installation.getConfigValues()
-                || installation.getConfigValues().isEmpty()
+                || null == installation.getPreferences()
+                || installation.getPreferences().isEmpty()
                 || !StringUtils.hasText(key)) {
             return Optional.empty();
         }
-        for (ConfigValues configValues : installation.getConfigValues()) {
-            if (key.equals(configValues.getKey()) && StringUtils.hasText(configValues.getValue())) {
-                return Optional.of(configValues.getValue());
-            }
-        }
+//        for (Preference configValues : installation.getPreferences()) {
+//            if (key.equals(configValues.getKey()) && StringUtils.hasText(configValues.getValues())) {
+//                return Optional.of(configValues.getValue());
+//            }
+//        }
         return Optional.empty();
     }
 

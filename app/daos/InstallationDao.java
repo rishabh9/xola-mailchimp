@@ -20,5 +20,6 @@ public interface InstallationDao extends GenericDao<Installation, ObjectId> {
     Installation getByUserAndInstallation(String userId, String installationId);
 
     Optional<Installation> getByInstallationId(String installationId);
+
     void dump(String json);
 }

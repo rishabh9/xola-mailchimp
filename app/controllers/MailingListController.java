@@ -13,7 +13,7 @@ import play.libs.ws.WSClient;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import utils.Errors;
+import utils.ErrorUtil;
 import utils.MessageKey;
 
 import javax.inject.Inject;
@@ -53,7 +53,7 @@ public class MailingListController extends Controller {
         if (!StringUtils.hasText(installationId)) {
             log.debug("Error validating the request parameters... Missing installation id");
             return CompletableFuture.completedFuture(
-                    badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_PARAM_I))));
+                    badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_PARAM_I))));
         }
         log.info("Requesting mailing list for installation {}", installationId);
         Optional<Installation> installation = installationDao.getByInstallationId(installationId);
@@ -62,7 +62,7 @@ public class MailingListController extends Controller {
         } else {
             log.debug("Didn't find the confirmation object having installationId: {}", installationId);
             return CompletableFuture.completedFuture(
-                    notFound(Errors.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND))));
+                    notFound(ErrorUtil.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND))));
         }
     }
 }

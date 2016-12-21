@@ -8,14 +8,14 @@ import java.util.Objects;
  */
 public class Configuration {
 
-    private List<ConfigValues> configValues;
+    private List<Preference> preferences;
 
-    public List<ConfigValues> getConfigValues() {
-        return configValues;
+    public List<Preference> getPreferences() {
+        return preferences;
     }
 
-    public void setConfigValues(List<ConfigValues> configValues) {
-        this.configValues = configValues;
+    public void setPreferences(List<Preference> preferences) {
+        this.preferences = preferences;
     }
 
     @Override
@@ -23,18 +23,18 @@ public class Configuration {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Configuration that = (Configuration) o;
-        return Objects.equals(configValues, that.configValues);
+        return Objects.equals(preferences, that.preferences);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(configValues);
+        return Objects.hash(preferences);
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Configuration{");
-        sb.append("configValues=").append(configValues);
+        sb.append("preferences=").append(preferences);
         sb.append('}');
         return sb.toString();
     }

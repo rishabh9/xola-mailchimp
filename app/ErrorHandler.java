@@ -9,7 +9,7 @@ import play.http.DefaultHttpErrorHandler;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
-import utils.Errors;
+import utils.ErrorUtil;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -39,10 +39,10 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
     protected CompletionStage<Result> onDevServerError(Http.RequestHeader request, UsefulException exception) {
         log.warn(exception.getMessage(), exception);
         if (exception.getCause() instanceof JsonMappingException) {
-            return CompletableFuture.completedFuture(Results.badRequest(Errors.toJson(BAD_REQUEST, JSON_ERROR)));
+            return CompletableFuture.completedFuture(Results.badRequest(ErrorUtil.toJson(BAD_REQUEST, JSON_ERROR)));
         } else {
             return CompletableFuture.completedFuture(
-                    Results.internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
+                    Results.internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
         }
     }
 
@@ -50,17 +50,17 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
     protected CompletionStage<Result> onProdServerError(Http.RequestHeader request, UsefulException exception) {
         log.warn(exception.getMessage(), exception);
         if (exception.getCause() instanceof JsonMappingException) {
-            return CompletableFuture.completedFuture(Results.badRequest(Errors.toJson(BAD_REQUEST, JSON_ERROR)));
+            return CompletableFuture.completedFuture(Results.badRequest(ErrorUtil.toJson(BAD_REQUEST, JSON_ERROR)));
         } else {
             return CompletableFuture.completedFuture(
-                    Results.internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
+                    Results.internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
         }
     }
 
     @Override
     protected CompletionStage<Result> onOtherClientError(Http.RequestHeader request, int statusCode, String message) {
         log.warn("Status: {}, Message: {}", statusCode, message);
-        return CompletableFuture.completedFuture(Results.status(statusCode, Errors.toJson(statusCode, INVALID_REQUEST)));
+        return CompletableFuture.completedFuture(Results.status(statusCode, ErrorUtil.toJson(statusCode, INVALID_REQUEST)));
     }
 
     @Override
@@ -68,13 +68,13 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
         log.warn(message);
         log.warn("{} - Requested: '{} {} {} {}', From: '{}'", message, request.method(), request.host(),
                 request.path(), request.contentType().get(), request.remoteAddress());
-        return CompletableFuture.completedFuture(Results.status(NOT_FOUND, Errors.toJson(NOT_FOUND, message)));
+        return CompletableFuture.completedFuture(Results.status(NOT_FOUND, ErrorUtil.toJson(NOT_FOUND, message)));
     }
 
     @Override
     public CompletionStage<Result> onClientError(Http.RequestHeader request, int statusCode, String message) {
         log.warn("Status: {}, Message: {}", statusCode, message);
-        return CompletableFuture.completedFuture(Results.status(statusCode, Errors.toJson(statusCode, INVALID_REQUEST)));
+        return CompletableFuture.completedFuture(Results.status(statusCode, ErrorUtil.toJson(statusCode, INVALID_REQUEST)));
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
         log.warn(message);
         log.warn("{} - Requested: '{} {} {} {}', From: '{}'", message, request.method(), request.host(),
                 request.path(), request.contentType().get(), request.remoteAddress());
-        return CompletableFuture.completedFuture(Results.status(BAD_REQUEST, Errors.toJson(BAD_REQUEST, message)));
+        return CompletableFuture.completedFuture(Results.status(BAD_REQUEST, ErrorUtil.toJson(BAD_REQUEST, message)));
     }
 
     @Override
@@ -90,17 +90,17 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
         log.warn(message);
         log.warn("{} - Requested: '{} {} {} {}', From: '{}'", message, request.method(), request.host(),
                 request.path(), request.contentType().get(), request.remoteAddress());
-        return CompletableFuture.completedFuture(Results.status(FORBIDDEN, Errors.toJson(FORBIDDEN, message)));
+        return CompletableFuture.completedFuture(Results.status(FORBIDDEN, ErrorUtil.toJson(FORBIDDEN, message)));
     }
 
     @Override
     public CompletionStage<Result> onServerError(Http.RequestHeader request, Throwable exception) {
         log.warn(exception.getMessage(), exception);
         if (exception.getCause() instanceof JsonMappingException) {
-            return CompletableFuture.completedFuture(Results.badRequest(Errors.toJson(BAD_REQUEST, JSON_ERROR)));
+            return CompletableFuture.completedFuture(Results.badRequest(ErrorUtil.toJson(BAD_REQUEST, JSON_ERROR)));
         } else {
             return CompletableFuture.completedFuture(
-                    Results.internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
+                    Results.internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR)));
         }
     }
 

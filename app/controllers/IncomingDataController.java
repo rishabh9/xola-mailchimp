@@ -62,7 +62,7 @@ public class IncomingDataController extends Controller {
     public CompletionStage<Result> index() {
         log.info("Received request from Xola...");
         JsonNode json = request().body().asJson();
-        installationDao.dump(json.toString());
+        installationDao.dump(json.textValue());
         Messages messages = messagesApi.preferred(request());
         String event = json.findPath("eventName").textValue();
         if (StringUtils.hasText(event)) {
@@ -78,11 +78,11 @@ public class IncomingDataController extends Controller {
                     return complete(executeInstallationEvents(event, json, messages));
                 default:
                     log.warn("Ignoring event {}.");
-                    return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
+                    return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
             }
         } else {
             log.error("Missing 'eventName' tag.");
-            return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON))));
+            return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON))));
         }
     }
 
@@ -92,7 +92,7 @@ public class IncomingDataController extends Controller {
         log.debug("To add email {} into mailing list of seller {}", email, sellerId);
         if (email == null) {
             log.warn("Incoming data is missing email parameter");
-            return complete(badRequest(Errors.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
+            return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
         } else {
             log.debug("Making call to Mailchimp to add to mailing list");
             Installation installation = installationDao.getByUserId(sellerId);
@@ -113,7 +113,7 @@ public class IncomingDataController extends Controller {
             } else {
                 log.error("Did not find configuration for user {}. Couldn't connect to MailChimp.", sellerId);
                 return complete(internalServerError(
-                        Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
+                        ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
             }
         }
     }
@@ -133,8 +133,8 @@ public class IncomingDataController extends Controller {
                 return updateHelper.updateConfiguration(data, messages);
             }
         } catch (Exception e) {
-            log.debug("Missing or invalid data object.");
-            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
+            log.debug("Missing or invalid data object.", e);
+            return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
     }
 

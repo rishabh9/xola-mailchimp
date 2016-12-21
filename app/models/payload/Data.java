@@ -1,6 +1,6 @@
 package models.payload;
 
-import models.ConfigValues;
+import models.Preference;
 import models.User;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class Data {
     private String pluginId;
     private String updatedAt;
     private User user;
-    private List<ConfigValues> configValues;
+    private List<Preference> preferences;
 
     public String getId() {
         return id;
@@ -49,12 +49,12 @@ public class Data {
         this.user = user;
     }
 
-    public List<ConfigValues> getConfigValues() {
-        return configValues;
+    public List<Preference> getPreferences() {
+        return preferences;
     }
 
-    public void setConfigValues(List<ConfigValues> configValues) {
-        this.configValues = configValues;
+    public void setPreferences(List<Preference> preferences) {
+        this.preferences = preferences;
     }
 
     @Override
@@ -66,12 +66,12 @@ public class Data {
                 Objects.equals(pluginId, data.pluginId) &&
                 Objects.equals(updatedAt, data.updatedAt) &&
                 Objects.equals(user, data.user) &&
-                Objects.equals(configValues, data.configValues);
+                Objects.equals(preferences, data.preferences);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, pluginId, updatedAt, user, configValues);
+        return Objects.hash(id, pluginId, updatedAt, user, preferences);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class Data {
         sb.append(", pluginId='").append(pluginId).append('\'');
         sb.append(", updatedAt='").append(updatedAt).append('\'');
         sb.append(", user=").append(user);
-        sb.append(", configValues=").append(configValues);
+        sb.append(", preferences=").append(preferences);
         sb.append('}');
         return sb.toString();
     }

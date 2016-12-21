@@ -9,7 +9,7 @@ import play.Logger;
 import play.i18n.Messages;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.Errors;
+import utils.ErrorUtil;
 import utils.MessageKey;
 
 import javax.inject.Inject;
@@ -43,26 +43,26 @@ public class ConfigUpdateHelper {
         log.info("Received request to update the plugin configuration for installation {}", data.getId());
         if (!StringUtils.hasText(data.getId())) {
             log.debug("Invalid installation id provided: {}", data.getId());
-            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.MISSING_INSTALL_ID)));
+            return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.MISSING_INSTALL_ID)));
         }
         Optional<Installation> installation = installationDao.getByInstallationId(data.getId());
         if (!installation.isPresent()) {
             log.debug("Installation with the given installation id was not found: {}", data.getId());
-            return notFound(Errors.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND)));
+            return notFound(ErrorUtil.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND)));
         }
-        if (data.getConfigValues().isEmpty()) {
+        if (data.getPreferences().isEmpty()) {
             log.debug("Missing config values");
-            badRequest(Errors.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
+            badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
         Installation confirm = installation.get();
-        confirm.setConfigValues(data.getConfigValues());
+        confirm.setPreferences(data.getPreferences());
         WriteResult result = installationDao.insert(confirm);
         if (result.wasAcknowledged()) {
             log.debug("Configuration saved successfully for installation {}", data.getId());
-            return ok(Json.toJson(installationDao.get(confirm.getId()).getConfigValues()));
+            return ok(Json.toJson(installationDao.get(confirm.getId()).getPreferences()));
         } else {
             log.debug("Error saving configuration for installation {}", data.getId());
-            return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, MessageKey.UNEXPECTED_ERROR));
+            return internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, MessageKey.UNEXPECTED_ERROR));
         }
     }
 }

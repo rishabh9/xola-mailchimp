@@ -8,16 +8,18 @@ import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
-import play.libs.Json;
 import play.mvc.Result;
-import utils.Errors;
+import utils.ErrorUtil;
+import utils.MessageKey;
 
 import javax.inject.Inject;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
 
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.INTERNAL_SERVER_ERROR;
-import static play.mvc.Results.*;
+import static play.mvc.Results.badRequest;
+import static play.mvc.Results.internalServerError;
 import static utils.MessageKey.INVALID_JSON;
 import static utils.MessageKey.UNEXPECTED_ERROR;
 
@@ -39,9 +41,10 @@ public class NewInstallationHelper {
 
     public Result newInstall(Data data, Messages messages) {
         log.info("Received installation request...");
-        if (isInvalid(data)) {
-            log.debug("Data object has validation errors");
-            return badRequest(Errors.toJson(BAD_REQUEST, messages.at(INVALID_JSON)));
+        Map<String, String> validationErrors = getValidationErrors(data, messages);
+        if (!validationErrors.isEmpty()) {
+            log.debug("Data object has validation errors... {}", validationErrors);
+            return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(INVALID_JSON), validationErrors));
         }
         Installation installation = installationDao.getByUserId(data.getUser().getId());
         if (null != installation) {
@@ -53,35 +56,35 @@ public class NewInstallationHelper {
         }
         WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
-            Installation inst = installationDao.get((ObjectId) result.getUpsertedId());
-            CompletableFuture.supplyAsync(() -> verifier.verifyAndCompleteInstallation(inst));
-            if (result.isUpdateOfExisting()) {
-                log.info("Installation {} updated", result.getUpsertedId().toString());
-                return ok(Json.toJson(inst));
-            } else {
-                log.info("Installation {} created", result.getUpsertedId().toString());
-                return created(Json.toJson(inst));
-            }
+            ObjectId installationId = result.getUpsertedId() == null ? installation.getId() : (ObjectId) result.getUpsertedId();
+            Installation inst = installationDao.get(installationId);
+            log.info("Installation {} updated", inst.getId());
+            return verifier.verifyAndCompleteInstallation(inst, messages);
         } else {
             log.error("Error while persisting installation. {}", result.toString());
-            return internalServerError(Errors.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
+            return internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
         }
     }
 
-    private boolean isInvalid(Data data) {
+    private Map<String, String> getValidationErrors(Data data, Messages messages) {
+        Map<String, String> errors = new HashMap<>();
         if (!StringUtils.hasText(data.getId())) {
             log.debug("Missing installation id.");
-            return true;
+            errors.put("payload.data.id", messages.at(MessageKey.MISSING_INSTALL_ID));
         }
         if (null == data.getUser()) {
             log.debug("Missing user object.");
-            return true;
+            errors.put("payload.data.user", messages.at(MessageKey.MISSING_USER_DETAILS));
         }
         if (!StringUtils.hasText(data.getUser().getId())) {
             log.debug("Missing user id.");
-            return true;
+            errors.put("payload.data.user.id", messages.at(MessageKey.MISSING_USER_ID));
         }
-        return false;
+        if (null == data.getPreferences() || data.getPreferences().isEmpty()) {
+            log.debug("Missing preferences");
+            errors.put("payload.data.preferences", messages.at(MessageKey.MISSING_PREFERENCES));
+        }
+        return errors;
     }
 
     private void copyOverData(Data data, Installation installation) {
@@ -93,7 +96,7 @@ public class NewInstallationHelper {
         } else {
             installation.setUser(data.getUser());
         }
-        installation.setConfigValues(data.getConfigValues());
+        installation.setPreferences(data.getPreferences());
     }
 
 

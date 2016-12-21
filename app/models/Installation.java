@@ -10,9 +10,7 @@ public class Installation extends BaseModel {
 
     private String installationId;
     private User user;
-    private String oauthCode;
-    private String accessToken;
-    private List<ConfigValues> configValues;
+    private List<Preference> preferences;
 
     public String getInstallationId() {
         return installationId;
@@ -30,28 +28,12 @@ public class Installation extends BaseModel {
         this.user = user;
     }
 
-    public String getOauthCode() {
-        return oauthCode;
+    public List<Preference> getPreferences() {
+        return preferences;
     }
 
-    public void setOauthCode(String oauthCode) {
-        this.oauthCode = oauthCode;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public List<ConfigValues> getConfigValues() {
-        return configValues;
-    }
-
-    public void setConfigValues(List<ConfigValues> configValues) {
-        this.configValues = configValues;
+    public void setPreferences(List<Preference> preferences) {
+        this.preferences = preferences;
     }
 
     @Override
@@ -61,25 +43,17 @@ public class Installation extends BaseModel {
         Installation that = (Installation) o;
         return Objects.equals(installationId, that.installationId) &&
                 Objects.equals(user, that.user) &&
-                Objects.equals(oauthCode, that.oauthCode) &&
-                Objects.equals(accessToken, that.accessToken) &&
-                Objects.equals(configValues, that.configValues);
+                Objects.equals(preferences, that.preferences);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installationId, user, oauthCode, accessToken, configValues);
+        return Objects.hash(installationId, user, preferences);
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Installation{");
-        sb.append("installationId='").append(installationId).append('\'');
-        sb.append(", user=").append(user);
-        sb.append(", oauthCode='").append(oauthCode).append('\'');
-        sb.append(", accessToken='").append(accessToken).append('\'');
-        sb.append(", configuration=").append(configValues);
-        sb.append('}');
-        return sb.toString();
+        return "Installation{" + "installationId='" + installationId + '\'' + ", user=" + user +
+                ", preferences=" + preferences + '}';
     }
 }

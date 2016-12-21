@@ -97,9 +97,9 @@ public class InstallationDaoImpl implements InstallationDao {
 
     @Override
     public void dump(String json) {
-        dumps().insert("{ \"date\" : "
+        dumps().insert("{ \"date\" : \""
                 + ZonedDateTime.now(ZoneId.of("GMT")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                + ", \"data\" : " + json + " }");
+                + "\", \"data\" : " + json + " }");
     }
 
     @Override
