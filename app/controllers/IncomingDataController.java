@@ -62,7 +62,6 @@ public class IncomingDataController extends Controller {
     public CompletionStage<Result> index() {
         log.info("Received request from Xola...");
         JsonNode json = request().body().asJson();
-        installationDao.dump(json.textValue());
         Messages messages = messagesApi.preferred(request());
         String event = json.findPath("eventName").textValue();
         if (StringUtils.hasText(event)) {

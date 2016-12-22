@@ -9,9 +9,6 @@ import org.jongo.MongoCursor;
 import uk.co.panaxiom.playjongo.PlayJongo;
 
 import javax.inject.Inject;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -93,13 +90,6 @@ public class InstallationDaoImpl implements InstallationDao {
         return installations()
                 .findOne("{$and: [{user.id: #}, {installationId: #}]}", userId, installationId)
                 .as(Installation.class);
-    }
-
-    @Override
-    public void dump(String json) {
-        dumps().insert("{ \"date\" : \""
-                + ZonedDateTime.now(ZoneId.of("GMT")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                + "\", \"data\" : " + json + " }");
     }
 
     @Override
