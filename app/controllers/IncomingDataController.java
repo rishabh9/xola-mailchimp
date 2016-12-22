@@ -23,6 +23,8 @@ import play.mvc.Result;
 import utils.*;
 
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -133,7 +135,9 @@ public class IncomingDataController extends Controller {
             }
         } catch (Exception e) {
             log.debug("Missing or invalid data object.", e);
-            return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
+            Map<String, String> errorMessages = new HashMap<>();
+            errorMessages.put("payload.data", messages.at(MessageKey.MISSING_PAYLOAD_DATA));
+            return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON), errorMessages));
         }
     }
 

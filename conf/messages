@@ -16,3 +16,4 @@ invalid.mc.api.key                  = Invalid Mailchimp API key provided.
 validation.errors                   = There are validation errors.
 validations.passed                  = All validations passed!
 config.updated                      = Configuration successfully updated.
+missing.data.object                 = Request payload is missing data object.
