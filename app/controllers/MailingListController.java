@@ -17,6 +17,8 @@ import utils.ErrorUtil;
 import utils.MessageKey;
 
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -49,20 +51,31 @@ public class MailingListController extends Controller {
         log.info("Request made to retrieve the mailings lists... as json");
         Messages messages = messagesApi.preferred(request());
         DynamicForm requestData = formFactory.form().bindFromRequest();
-        String installationId = requestData.get("installationId");
+        String installationId = requestData.get("iid");
         if (!StringUtils.hasText(installationId)) {
             log.debug("Error validating the request parameters... Missing installation id");
-            return CompletableFuture.completedFuture(
-                    badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_PARAM_I))));
+            return CompletableFuture.completedFuture(invalidParameters(messages, "iid", MessageKey.INVALID_PARAM_IID));
+        }
+        String key = requestData.get("key");
+        if (!StringUtils.hasText(key)) {
+            log.debug("Error validating the request parameters... Missing field key");
+            return CompletableFuture.completedFuture(invalidParameters(messages, "key", MessageKey.INVALID_PARAM_KEY));
         }
         log.info("Requesting mailing list for installation {}", installationId);
         Optional<Installation> installation = installationDao.getByInstallationId(installationId);
         if (installation.isPresent()) {
-            return helper.getMailingListsAsJson(installation.get());
+            return helper.getMailingListsAsJson(installation.get(), messages);
         } else {
-            log.debug("Didn't find the confirmation object having installationId: {}", installationId);
+            log.debug("Didn't find the installation object having id: {}", installationId);
             return CompletableFuture.completedFuture(
                     notFound(ErrorUtil.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND))));
         }
     }
+
+    private Result invalidParameters(Messages messages, String parameterName, String messageKey) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put(parameterName, messages.at(messageKey));
+        return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.VALIDATION_ERRORS), errorMap));
+    }
+
 }

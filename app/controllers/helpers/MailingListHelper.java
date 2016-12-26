@@ -6,22 +6,28 @@ import models.Installation;
 import models.MailingList;
 import play.Configuration;
 import play.Logger;
+import play.i18n.Messages;
 import play.inject.ConfigurationProvider;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSResponse;
 import play.mvc.Http;
 import play.mvc.Result;
+import utils.ErrorUtil;
 import utils.InstallationUtility;
+import utils.MessageKey;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import static play.mvc.Http.Status.INTERNAL_SERVER_ERROR;
+import static play.mvc.Results.internalServerError;
 import static play.mvc.Results.ok;
 import static utils.Constants.MAILCHIMP_GET_LISTS_URL;
 
@@ -45,7 +51,7 @@ public final class MailingListHelper {
         this.utility = utility;
     }
 
-    public CompletionStage<Result> getMailingListsAsJson(Installation installation) {
+    public CompletionStage<Result> getMailingListsAsJson(Installation installation, Messages messages) {
 
         Optional<String> apiKey = utility.getApiKey(installation);
         Optional<String> dataCentre = utility.getDataCentre(installation);
@@ -58,27 +64,36 @@ public final class MailingListHelper {
                     .get()
                     .thenApply(wsResponse -> getListsForJson(wsResponse, installation));
         } else {
-            return CompletableFuture.completedFuture(okResponse(Json.newArray(), ""));
+            log.error("Error querying mailchimp api key and datacentre for instalaltion {}",
+                    installation.getId().toHexString());
+            return CompletableFuture.completedFuture(internalServerError(
+                    ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(MessageKey.UNEXPECTED_ERROR))));
         }
     }
 
     private Result getListsForJson(WSResponse wsResponse, Installation installation) {
         log.debug("Getting mailing lists for installation {} was a success", installation.getId().toString());
-        List<MailingList> lists = getMailingLists(wsResponse);
-        if (lists.isEmpty()) {
-            log.debug("Received empty mailing list for installation {}", installation.getId().toString());
-            return okResponse(Json.newArray(), "");
+        ArrayNode array = Json.newArray();
+        if (wsResponse.getStatus() == Http.Status.OK) {
+            List<MailingList> lists = getMailingLists(wsResponse);
+            if (lists.isEmpty()) {
+                log.debug("Received empty mailing list from mailchimp for installation {}", installation.getId().toString());
+                return result(array, "");
+            } else {
+                lists.forEach(mailingList -> array.add(
+                        Json.newObject().put("id", mailingList.getId()).put("value", mailingList.getName())));
+                String selectedId = getSelectedValue(installation);
+                log.debug("Returning {} items with default as {}", array.size(), selectedId);
+                return result(array, selectedId);
+            }
         } else {
-            ArrayNode array = Json.newArray();
-            lists.forEach(mailingList -> array.add(
-                    Json.newObject().put("key", mailingList.getId()).put("value", mailingList.getName())));
-            String selectedId = getSelectedValue(installation);
-            log.debug("Returning {} items with default as {}", array.size(), selectedId);
-            return okResponse(array, selectedId);
+            log.error("Error retrieving list of mailing lists from mailchimp {}, {}, {}",
+                    wsResponse.getStatus(), wsResponse.getStatusText(), wsResponse.getBody());
+            return result(array, "");
         }
     }
 
-    private Result okResponse(ArrayNode array, String selectedId) {
+    private Result result(ArrayNode array, String selectedId) {
         return ok(Json.newObject().put("default", selectedId).set("values", array));
     }
 
@@ -90,8 +105,8 @@ public final class MailingListHelper {
     private List<MailingList> getMailingLists(WSResponse wsResponse) {
         JsonNode jsonNode = wsResponse.asJson();
         JsonNode arr = jsonNode.get("lists");
-        List<MailingList> lists = new ArrayList<>();
         if (arr.isArray()) {
+            List<MailingList> lists = new ArrayList<>(arr.size());
             log.debug("Count of available mailing lists: {}", arr.size());
             for (int i = 0; i < arr.size(); i++) {
                 MailingList list = new MailingList();
@@ -100,7 +115,9 @@ public final class MailingListHelper {
                 list.setName(node.get("name").asText());
                 lists.add(list);
             }
+            return lists;
+        } else {
+            return Collections.emptyList();
         }
-        return lists;
     }
 }
