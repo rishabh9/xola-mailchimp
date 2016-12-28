@@ -77,11 +77,12 @@ public final class MailingListHelper {
         if (wsResponse.getStatus() == Http.Status.OK) {
             List<MailingList> lists = getMailingLists(wsResponse);
             if (lists.isEmpty()) {
-                log.debug("Received empty mailing list from mailchimp for installation {}", installation.getId().toString());
+                log.debug("Received empty mailing list from mailchimp for installation {}",
+                        installation.getId().toString());
                 return result(array, "");
             } else {
                 lists.forEach(mailingList -> array.add(
-                        Json.newObject().put("id", mailingList.getId()).put("value", mailingList.getName())));
+                        Json.newObject().put("id", mailingList.getId()).put("label", mailingList.getName())));
                 String selectedId = getSelectedValue(installation);
                 log.debug("Returning {} items with default as {}", array.size(), selectedId);
                 return result(array, selectedId);
