@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Preference {
 
     private String key;
-    private List<String> values;
+    private List<Value> values;
 
     public String getKey() {
         return key;
@@ -19,11 +19,11 @@ public class Preference {
         this.key = key;
     }
 
-    public List<String> getValues() {
+    public List<Value> getValues() {
         return values;
     }
 
-    public void setValues(List<String> values) {
+    public void setValues(List<Value> values) {
         this.values = values;
     }
 
