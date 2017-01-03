@@ -16,10 +16,7 @@ import play.inject.ConfigurationProvider;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
-import play.mvc.BodyParser;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Result;
+import play.mvc.*;
 import utils.*;
 
 import javax.inject.Inject;
@@ -35,6 +32,7 @@ import static utils.MessageKey.MISSING_PARAM_EMAIL;
 /**
  * @author rishabh
  */
+@With(AccessLoggingAction.class)
 public class IncomingDataController extends Controller {
 
     private final Logger.ALogger log = Logger.of(IncomingDataController.class);

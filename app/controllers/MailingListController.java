@@ -9,10 +9,11 @@ import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
-import play.libs.ws.WSClient;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.With;
+import utils.AccessLoggingAction;
 import utils.ErrorUtil;
 import utils.MessageKey;
 
@@ -26,20 +27,19 @@ import java.util.concurrent.CompletionStage;
 /**
  * @author rishabh
  */
+@With(AccessLoggingAction.class)
 public class MailingListController extends Controller {
 
     private final Logger.ALogger log = Logger.of(MailingListController.class);
 
-    private final WSClient ws;
     private final InstallationDao installationDao;
     private final MessagesApi messagesApi;
     private final FormFactory formFactory;
     private final MailingListHelper helper;
 
     @Inject
-    public MailingListController(WSClient ws, InstallationDao installationDao, MessagesApi messagesApi,
-                                 FormFactory formFactory, MailingListHelper helper) {
-        this.ws = ws;
+    public MailingListController(InstallationDao installationDao, MessagesApi messagesApi, FormFactory formFactory,
+                                 MailingListHelper helper) {
         this.installationDao = installationDao;
         this.messagesApi = messagesApi;
         this.formFactory = formFactory;
