@@ -75,8 +75,10 @@ public class IncomingDataController extends Controller {
                 case Event.PLUGIN_INSTALL:
                     log.debug("Installation event received");
                     return complete(executeInstallationEvents(event, json, messages));
+                case Event.PLUGIN_UNINSTALL:
+                    log.warn("Ignoring event {}.", event);
                 default:
-                    log.warn("Ignoring event {}.");
+                    log.warn("Ignoring event {}.", event);
                     return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
             }
         } else {
@@ -132,7 +134,7 @@ public class IncomingDataController extends Controller {
                 return updateHelper.updateConfiguration(data, messages);
             }
         } catch (Exception e) {
-            log.debug("Missing or invalid data object.", e);
+            log.error("Missing or invalid data object.", e);
             Map<String, String> errorMessages = new HashMap<>();
             errorMessages.put("payload.data", messages.at(MessageKey.MISSING_PAYLOAD_DATA));
             return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON), errorMessages));

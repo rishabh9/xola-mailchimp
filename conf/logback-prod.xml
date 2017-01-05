@@ -2,9 +2,9 @@
 <configuration>
 
     <logger name="play" level="INFO"/>
-    <logger name="application" level="INFO"/>
-    <logger name="controllers" level="INFO"/>
-    <logger name="daos" level="INFO"/>
+    <logger name="application" level="debug"/>
+    <logger name="controllers" level="debug"/>
+    <logger name="daos" level="debug"/>
 
 
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
