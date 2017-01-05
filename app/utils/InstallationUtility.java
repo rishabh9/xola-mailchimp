@@ -1,7 +1,7 @@
 package utils;
 
 import models.Installation;
-import org.springframework.util.StringUtils;
+import models.Preference;
 
 import javax.inject.Singleton;
 import java.util.Optional;
@@ -12,47 +12,43 @@ import static utils.Constants.CONFIG_MC_LIST_ID;
 /**
  * @author rishabh
  */
-@Deprecated
 @Singleton
 public class InstallationUtility {
 
-    public Optional<String> getValue(Installation installation, String key) {
-        if (null == installation
-                || null == installation.getPreferences()
-                || installation.getPreferences().isEmpty()
-                || !StringUtils.hasText(key)) {
-            return Optional.empty();
-        }
-//        for (Preference configValues : installation.getPreferences()) {
-//            if (key.equals(configValues.getKey()) && StringUtils.hasText(configValues.getValues())) {
-//                return Optional.of(configValues.getValue());
-//            }
-//        }
-        return Optional.empty();
-    }
 
     public Optional<String> getConfiguredListId(Installation installation) {
-        return getValue(installation, CONFIG_MC_LIST_ID);
+        Optional<String> value = Optional.empty();
+        for (Preference preference : installation.getPreferences()) {
+            if (preference.getKey().equals(CONFIG_MC_LIST_ID)) {
+                String label = preference.getValues().get(0).getLabel();
+                value = Optional.ofNullable(label);
+            }
+        }
+        return value;
     }
 
     public Optional<String> getDataCentre(Installation installation) {
-        return splitApiKey(installation, 1);
+        Optional<String> value = Optional.empty();
+        for (Preference preference : installation.getPreferences()) {
+            if (preference.getKey().equals(CONFIG_MC_API_KEY)) {
+                String label = preference.getValues().get(0).getLabel();
+                String[] arr = label.split("-");
+                value = Optional.ofNullable(arr[1]);
+            }
+        }
+        return value;
     }
 
     public Optional<String> getApiKey(Installation installation) {
-        return splitApiKey(installation, 1);
-    }
-
-    private Optional<String> splitApiKey(Installation installation, int part) {
-        if (part == 0 || part == 1) {
-            Optional<String> apiKey = this.getValue(installation, CONFIG_MC_API_KEY);
-            if (apiKey.isPresent() && StringUtils.hasText(apiKey.get())) {
-                String[] meta = apiKey.get().split("-");
-                if (meta.length == 2 && StringUtils.hasText(meta[part])) {
-                    return Optional.of(meta[part]);
-                }
+        Optional<String> value = Optional.empty();
+        for (Preference preference : installation.getPreferences()) {
+            if (preference.getKey().equals(CONFIG_MC_API_KEY)) {
+                String label = preference.getValues().get(0).getLabel();
+                String[] arr = label.split("-");
+                value = Optional.ofNullable(arr[0]);
             }
         }
-        return Optional.empty();
+        return value;
     }
+
 }

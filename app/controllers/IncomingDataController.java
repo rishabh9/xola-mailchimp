@@ -126,18 +126,19 @@ public class IncomingDataController extends Controller {
     }
 
     private Result executeInstallationEvents(String event, JsonNode json, Messages messages) {
+        Data data;
         try {
-            Data data = Json.fromJson(json.findPath("data"), Data.class);
-            if (event.equals(Event.PLUGIN_INSTALL)) {
-                return installationHelper.newInstall(data, messages);
-            } else {
-                return updateHelper.updateConfiguration(data, messages);
-            }
+            data = Json.fromJson(json.findPath("data"), Data.class);
         } catch (Exception e) {
             log.error("Missing or invalid data object.", e);
             Map<String, String> errorMessages = new HashMap<>();
             errorMessages.put("payload.data", messages.at(MessageKey.MISSING_PAYLOAD_DATA));
             return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON), errorMessages));
+        }
+        if (event.equals(Event.PLUGIN_INSTALL)) {
+            return installationHelper.newInstall(data, messages);
+        } else {
+            return updateHelper.updateConfiguration(data, messages);
         }
     }
 

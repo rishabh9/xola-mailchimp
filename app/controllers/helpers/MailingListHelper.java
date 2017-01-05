@@ -64,7 +64,7 @@ public final class MailingListHelper {
                     .get()
                     .thenApply(wsResponse -> getListsForJson(wsResponse, installation));
         } else {
-            log.error("Error querying mailchimp api key and datacentre for instalaltion {}",
+            log.error("Error querying mailchimp api key and datacentre for installation {}",
                     installation.getId().toHexString());
             return CompletableFuture.completedFuture(internalServerError(
                     ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(MessageKey.UNEXPECTED_ERROR))));
