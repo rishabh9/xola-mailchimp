@@ -10,7 +10,7 @@ public class BooleanValue extends Value<Boolean> {
 
     @JsonCreator
     public BooleanValue(@JsonProperty("id") String id, @JsonProperty("label") Boolean label) {
-        super();
+        super(TYPE_BOOLEAN);
         setId(id);
         setLabel(label);
     }

@@ -10,7 +10,7 @@ public class IntegerValue extends Value<Long> {
 
     @JsonCreator
     public IntegerValue(@JsonProperty("id") String id, @JsonProperty("label") Long label) {
-        super();
+        super(TYPE_NUMBER);
         setId(id);
         setLabel(label);
     }

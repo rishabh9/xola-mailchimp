@@ -10,7 +10,7 @@ public class FloatValue extends Value<Double> {
 
     @JsonCreator
     public FloatValue(@JsonProperty("id") String id, @JsonProperty("label") Double label) {
-        super();
+        super(TYPE_DECIMAL);
         setId(id);
         setLabel(label);
     }

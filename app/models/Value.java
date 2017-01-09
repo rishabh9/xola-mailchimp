@@ -16,9 +16,19 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = BooleanValue.class, name = "boolean"),
 })
 public abstract class Value<T> {
+
+    protected static final String TYPE_STRING = "string";
+    protected static final String TYPE_NUMBER = "number";
+    protected static final String TYPE_DECIMAL = "decimal";
+    protected static final String TYPE_BOOLEAN = "boolean";
+
     private String type;
     private String id;
     private T label;
+
+    public Value(String type) {
+        this.type = type;
+    }
 
     public String getId() {
         return id;

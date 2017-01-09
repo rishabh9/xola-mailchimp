@@ -3,7 +3,6 @@ package controllers.helpers;
 import com.mongodb.WriteResult;
 import daos.InstallationDao;
 import models.Installation;
-import models.Preference;
 import models.payload.Data;
 import org.springframework.util.StringUtils;
 import play.Logger;
@@ -13,7 +12,6 @@ import utils.ErrorUtil;
 import utils.MessageKey;
 
 import javax.inject.Inject;
-import java.util.List;
 import java.util.Optional;
 
 import static play.mvc.Http.Status.*;
@@ -56,9 +54,7 @@ public class ConfigUpdateHelper {
             badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
         Installation confirm = installation.get();
-        List<Preference> prefs = confirm.getPreferences();
-        prefs.addAll(data.getPreferences());
-        confirm.setPreferences(prefs);
+        confirm.setPreferences(data.getPreferences());
         WriteResult result = installationDao.insert(confirm);
         if (result.wasAcknowledged()) {
             log.debug("Configuration saved successfully for installation {}", data.getId());

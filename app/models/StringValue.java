@@ -10,7 +10,7 @@ public final class StringValue extends Value<String> {
 
     @JsonCreator
     public StringValue(@JsonProperty("id") String id, @JsonProperty("label") String label) {
-        super();
+        super(TYPE_STRING);
         setId(id);
         setLabel(label);
     }

@@ -3,8 +3,8 @@ package models.payload;
 import models.Preference;
 import models.User;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author rishabh
@@ -15,7 +15,7 @@ public class Data {
     private String pluginId;
     private String updatedAt;
     private User user;
-    private List<Preference> preferences;
+    private Set<Preference> preferences;
 
     public String getId() {
         return id;
@@ -49,11 +49,11 @@ public class Data {
         this.user = user;
     }
 
-    public List<Preference> getPreferences() {
+    public Set<Preference> getPreferences() {
         return preferences;
     }
 
-    public void setPreferences(List<Preference> preferences) {
+    public void setPreferences(Set<Preference> preferences) {
         this.preferences = preferences;
     }
 
