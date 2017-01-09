@@ -15,7 +15,7 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = FloatValue.class, name = "decimal"),
         @JsonSubTypes.Type(value = BooleanValue.class, name = "boolean"),
 })
-public abstract class BaseValue<T> {
+public abstract class Value<T> {
     private String type;
     private String id;
     private T label;
@@ -48,7 +48,7 @@ public abstract class BaseValue<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BaseValue<?> value = (BaseValue<?>) o;
+        Value<?> value = (Value<?>) o;
         return
                 Objects.equals(type, value.type) &&
                         Objects.equals(id, value.id) &&

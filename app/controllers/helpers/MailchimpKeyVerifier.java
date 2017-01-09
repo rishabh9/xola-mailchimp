@@ -1,7 +1,7 @@
 package controllers.helpers;
 
-import models.BaseValue;
 import models.Installation;
+import models.Value;
 import org.springframework.util.StringUtils;
 import play.Configuration;
 import play.Logger;
@@ -52,7 +52,7 @@ public class MailchimpKeyVerifier {
      * @return
      */
     Result verifyAndCompleteInstallation(Installation installation, Messages messages) {
-        Map<String, List<BaseValue>> prefsMap = new HashMap<>();
+        Map<String, List<Value>> prefsMap = new HashMap<>();
         installation.getPreferences().forEach(preference -> prefsMap.put(preference.getKey(), preference.getValues()));
         if (prefsMap.isEmpty() || null == prefsMap.get(Constants.CONFIG_MC_API_KEY)) {
             log.error("Mailchimp API key not provided as part of installation initiation");
