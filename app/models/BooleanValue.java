@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author rishabh
  */
-public class BooleanValue extends BaseValue<Boolean> {
+public class BooleanValue extends Value<Boolean> {
 
     @JsonCreator
     public BooleanValue(@JsonProperty("id") String id, @JsonProperty("label") Boolean label) {

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author rishabh
  */
-public class FloatValue extends BaseValue<Double> {
+public class FloatValue extends Value<Double> {
 
     @JsonCreator
     public FloatValue(@JsonProperty("id") String id, @JsonProperty("label") Double label) {
