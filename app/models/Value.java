@@ -11,14 +11,14 @@ import java.util.Objects;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StringValue.class, name = "string"),
-        @JsonSubTypes.Type(value = IntegerValue.class, name = "number"),
+        @JsonSubTypes.Type(value = IntegerValue.class, name = "integer"),
         @JsonSubTypes.Type(value = FloatValue.class, name = "decimal"),
         @JsonSubTypes.Type(value = BooleanValue.class, name = "boolean"),
 })
 public abstract class Value<T> {
 
     protected static final String TYPE_STRING = "string";
-    protected static final String TYPE_NUMBER = "number";
+    protected static final String TYPE_NUMBER = "integer";
     protected static final String TYPE_DECIMAL = "decimal";
     protected static final String TYPE_BOOLEAN = "boolean";
 
