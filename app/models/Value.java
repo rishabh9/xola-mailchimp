@@ -1,26 +1,33 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.Objects;
 
 /**
  * @author rishabh
  */
-public final class Value {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = StringValue.class, name = "string"),
+        @JsonSubTypes.Type(value = IntegerValue.class, name = "integer"),
+        @JsonSubTypes.Type(value = FloatValue.class, name = "decimal"),
+        @JsonSubTypes.Type(value = BooleanValue.class, name = "boolean"),
+})
+public abstract class Value<T> {
 
+    protected static final String TYPE_STRING = "string";
+    protected static final String TYPE_NUMBER = "integer";
+    protected static final String TYPE_DECIMAL = "decimal";
+    protected static final String TYPE_BOOLEAN = "boolean";
+
+    private String type;
     private String id;
+    private T label;
 
-    private String label;
-
-    public Value() {
-    }
-
-    private Value(Builder builder) {
-        setId(builder.id);
-        setLabel(builder.label);
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
+    public Value(String type) {
+        this.type = type;
     }
 
     public String getId() {
@@ -31,52 +38,40 @@ public final class Value {
         this.id = id;
     }
 
-    public String getLabel() {
+    public T getLabel() {
         return label;
     }
 
-    public void setLabel(String label) {
+    public void setLabel(T label) {
         this.label = label;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Value value = (Value) o;
-        return Objects.equals(id, value.id) &&
-                Objects.equals(label, value.label);
+        Value<?> value = (Value<?>) o;
+        return
+                Objects.equals(type, value.type) &&
+                        Objects.equals(id, value.id) &&
+                        Objects.equals(label, value.label);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, label);
+        return Objects.hash(type, id, label);
     }
 
     @Override
     public String toString() {
-        return "Value{" + "id='" + id + '\'' + ", label='" + label + '\'' + '}';
-    }
-
-    public static final class Builder {
-        private String id;
-        private String label;
-
-        private Builder() {
-        }
-
-        public Builder id(String id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder label(String label) {
-            this.label = label;
-            return this;
-        }
-
-        public Value build() {
-            return new Value(this);
-        }
+        return "Value{" + "type='" + type + '\'' + ", id='" + id + '\'' + ", label=" + label + '}';
     }
 }

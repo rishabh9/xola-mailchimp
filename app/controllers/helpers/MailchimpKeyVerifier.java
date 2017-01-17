@@ -58,7 +58,7 @@ public class MailchimpKeyVerifier {
             log.error("Mailchimp API key not provided as part of installation initiation");
             return returnErrorMailchimpApiKeyNotProvided(messages);
         }
-        String apiKeyWithDataCentre = prefsMap.get(Constants.CONFIG_MC_API_KEY).get(0).getLabel();
+        String apiKeyWithDataCentre = (String) prefsMap.get(Constants.CONFIG_MC_API_KEY).get(0).getLabel();
         if (StringUtils.hasText(apiKeyWithDataCentre) && apiKeyWithDataCentre.indexOf('-') > 0) {
             String[] meta = apiKeyWithDataCentre.split("-");
             String apiKey = meta[0];

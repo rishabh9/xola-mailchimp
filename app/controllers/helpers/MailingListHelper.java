@@ -82,7 +82,10 @@ public final class MailingListHelper {
                 return result(array, "");
             } else {
                 lists.forEach(mailingList -> array.add(
-                        Json.newObject().put("id", mailingList.getId()).put("label", mailingList.getName())));
+                        Json.newObject()
+                                .put("id", mailingList.getId())
+                                .put("label", mailingList.getName())
+                                .put("type", "string"))); // always of type string
                 String selectedId = getSelectedValue(installation);
                 log.debug("Returning {} items with default as {}", array.size(), selectedId);
                 return result(array, selectedId);

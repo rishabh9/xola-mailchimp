@@ -20,7 +20,7 @@ public class InstallationUtility {
         Optional<String> value = Optional.empty();
         for (Preference preference : installation.getPreferences()) {
             if (preference.getKey().equals(CONFIG_MC_LIST_ID)) {
-                String label = preference.getValues().get(0).getLabel();
+                String label = (String) preference.getValues().get(0).getLabel();
                 value = Optional.ofNullable(label);
             }
         }
@@ -31,7 +31,7 @@ public class InstallationUtility {
         Optional<String> value = Optional.empty();
         for (Preference preference : installation.getPreferences()) {
             if (preference.getKey().equals(CONFIG_MC_API_KEY)) {
-                String label = preference.getValues().get(0).getLabel();
+                String label = (String) preference.getValues().get(0).getLabel();
                 String[] arr = label.split("-");
                 value = Optional.ofNullable(arr[1]);
             }
@@ -43,7 +43,7 @@ public class InstallationUtility {
         Optional<String> value = Optional.empty();
         for (Preference preference : installation.getPreferences()) {
             if (preference.getKey().equals(CONFIG_MC_API_KEY)) {
-                String label = preference.getValues().get(0).getLabel();
+                String label = (String) preference.getValues().get(0).getLabel();
                 String[] arr = label.split("-");
                 value = Optional.ofNullable(arr[0]);
             }
