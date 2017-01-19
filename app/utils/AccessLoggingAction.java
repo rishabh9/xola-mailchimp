@@ -8,10 +8,7 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -49,7 +46,6 @@ class Request {
     private List<String> acceptLanguages;
     private String charset;
     private String contentType;
-    private List<Cookie> cookies;
     private Map<String, String[]> headers;
     private String host;
     private Map<String, String[]> queryString;
@@ -68,7 +64,6 @@ class Request {
         acceptLanguages = acceptLanguages(request.acceptLanguages());
         charset = request.charset().isPresent() ? request.charset().get() : "";
         contentType = request.contentType().isPresent() ? request.contentType().get() : "";
-        cookies = cookies(request.cookies());
         headers = request.headers();
         host = request.host();
         queryString = request.queryString();
@@ -79,24 +74,23 @@ class Request {
     }
 
     private List<String> acceptedTypes(List<MediaRange> acceptedTypes) {
-        List<String> media = new ArrayList<>(acceptedTypes.size());
-        acceptedTypes.forEach(mediaRange -> media.add(mediaRange.mediaType()));
-        return media;
+        if (null != acceptedTypes) {
+            List<String> media = new ArrayList<>(acceptedTypes.size());
+            acceptedTypes.forEach(mediaRange -> media.add(mediaRange.mediaType()));
+            return media;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private List<String> acceptLanguages(List<Lang> acceptLanguages) {
-        List<String> langs = new ArrayList<>(acceptLanguages.size());
-        acceptLanguages.forEach(lang -> langs.add(lang.toLocale().getDisplayName()));
-        return langs;
-    }
-
-    private List<Cookie> cookies(Http.Cookies cookies) {
-        List<Cookie> cookieStrs = new ArrayList<>();
-        cookies.forEach(cookie -> cookieStrs.add(Cookie.newBuilder().maxAge(cookie.maxAge()).domain(cookie.domain())
-                .httpOnly(cookie.httpOnly()).name(cookie.name()).path(cookie.path()).secure(cookie.secure())
-                .value(cookie.value())
-                .build()));
-        return cookieStrs;
+        if (null != acceptLanguages) {
+            List<String> langs = new ArrayList<>(acceptLanguages.size());
+            acceptLanguages.forEach(lang -> langs.add(lang.toLocale().getDisplayName()));
+            return langs;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     public String getMethod() {
@@ -133,10 +127,6 @@ class Request {
 
     public String getContentType() {
         return contentType;
-    }
-
-    public List<Cookie> getCookies() {
-        return cookies;
     }
 
     public Map<String, String[]> getHeaders() {
@@ -182,7 +172,6 @@ class Request {
                 Objects.equals(acceptLanguages, request.acceptLanguages) &&
                 Objects.equals(charset, request.charset) &&
                 Objects.equals(contentType, request.contentType) &&
-                Objects.equals(cookies, request.cookies) &&
                 Objects.equals(headers, request.headers) &&
                 Objects.equals(host, request.host) &&
                 Objects.equals(queryString, request.queryString) &&
@@ -194,101 +183,6 @@ class Request {
     @Override
     public int hashCode() {
         return Objects.hash(method, uri, remoteAddress, body, path, acceptedTypes, acceptLanguages, charset,
-                contentType, cookies, headers, host, queryString, secure, tags, version, username);
-    }
-}
-
-class Cookie {
-    private int maxAge;
-    private String domain;
-    private boolean httpOnly;
-    private String name;
-    private String path;
-    private boolean secure;
-    private String value;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Cookie cookie = (Cookie) o;
-        return maxAge == cookie.maxAge &&
-                httpOnly == cookie.httpOnly &&
-                secure == cookie.secure &&
-                Objects.equals(domain, cookie.domain) &&
-                Objects.equals(name, cookie.name) &&
-                Objects.equals(path, cookie.path) &&
-                Objects.equals(value, cookie.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(maxAge, domain, httpOnly, name, path, secure, value);
-    }
-
-    private Cookie(Builder builder) {
-        maxAge = builder.maxAge;
-        domain = builder.domain;
-        httpOnly = builder.httpOnly;
-        name = builder.name;
-        path = builder.path;
-        secure = builder.secure;
-        value = builder.value;
-    }
-
-    static Builder newBuilder() {
-        return new Builder();
-    }
-
-    static final class Builder {
-        private int maxAge;
-        private String domain;
-        private boolean httpOnly;
-        private String name;
-        private String path;
-        private boolean secure;
-        private String value;
-
-        private Builder() {
-        }
-
-        Builder maxAge(int maxAge) {
-            this.maxAge = maxAge;
-            return this;
-        }
-
-        Builder domain(String domain) {
-            this.domain = domain;
-            return this;
-        }
-
-        Builder httpOnly(boolean httpOnly) {
-            this.httpOnly = httpOnly;
-            return this;
-        }
-
-        Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        Builder path(String path) {
-            this.path = path;
-            return this;
-        }
-
-        Builder secure(boolean secure) {
-            this.secure = secure;
-            return this;
-        }
-
-        Builder value(String value) {
-            this.value = value;
-            return this;
-        }
-
-        Cookie build() {
-            return new Cookie(this);
-        }
+                contentType, headers, host, queryString, secure, tags, version, username);
     }
 }
