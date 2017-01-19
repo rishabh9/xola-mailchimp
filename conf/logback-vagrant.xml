@@ -30,6 +30,8 @@
     <logger name="controllers" level="INFO"/>
     <logger name="daos" level="INFO"/>
 
+    <logger name="access" level="DEBUG" additivity="false"/>
+
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
     <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF"/>
     <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF"/>

@@ -25,6 +25,10 @@
         <appender-ref ref="STDOUT"/>
     </appender>
 
+    <logger name="access" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
     <logger name="play" level="INFO"/>
     <logger name="application" level="INFO"/>
     <logger name="controllers" level="DEBUG"/>
