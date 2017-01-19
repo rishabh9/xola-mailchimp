@@ -77,6 +77,7 @@ public class IncomingDataController extends Controller {
                     return complete(executeInstallationEvents(event, json, messages));
                 case Event.PLUGIN_UNINSTALL:
                     log.warn("Ignoring event {}.", event);
+                    return complete(ok());
                 default:
                     log.warn("Ignoring event {}.", event);
                     return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.NOT_SUBSCRIBED))));
