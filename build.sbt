@@ -40,13 +40,6 @@ packageSummary in Linux := "The Mailchimp Integration for Xola"
 
 packageDescription := "The Mailchimp Integration for Xola"
 
-mappings in Universal <++= (packageBin in Compile) map { jar =>
-  val scriptsDir = new java.io.File("scripts/")
-  scriptsDir.listFiles.toSeq.map { f =>
-    f -> ("bin/" + f.getName)
-  }
-}
-
 javaOptions in Test += "-Dconfig.file=conf/application-test.conf"
 
 javaOptions in Test += "-Dlogger.file=conf/logback-test.xml"

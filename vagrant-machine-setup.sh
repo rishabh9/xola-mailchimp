@@ -187,6 +187,24 @@ sudo sed -i 's/logback-test.xml/logback-vagrant.xml/' /var/xola/plugins/mailchim
 sudo sed -i 's/logback-prod.xml/logback-vagrant.xml/' /var/xola/plugins/mailchimp/bin/start.sh
 
 ###############################################
+# Create start and stop scripts
+###############################################
+
+sudo rm /var/xola/plugins/mailchimp/bin/start.sh
+cat > /var/xola/plugins/mailchimp/bin/start.sh <<END
+#!/usr/bin/env bash
+nohup /var/xola/plugins/mailchimp/bin/xola-mailchimp -Dlogger.file=/var/xola/plugins/mailchimp/conf/logback-prod.xml -Dconfig.file=/var/xola/plugins/mailchimp/conf/application-prod.conf -Dhttp.port=9000 -J-Xms128M -J-Xmx512m -J-server &
+END
+sudo chmod a+x /var/xola/plugins/mailchimp/bin/start.sh
+
+sudo rm /var/xola/plugins/mailchimp/bin/stop.sh
+cat > /var/xola/plugins/mailchimp/bin/stop.sh <<EOF
+#!/usr/bin/env bash
+kill \$(cat /var/xola/plugins/mailchimp/RUNNING_PID)
+EOF
+sudo chmod a+x /var/xola/plugins/mailchimp/bin/stop.sh
+
+###############################################
 # Configure Mailchimp as a service
 ###############################################
 
@@ -195,7 +213,9 @@ sudo cp /vagrant/mailchimp.init /etc/init.d/mailchimp
 sudo chmod a+x /etc/init.d/mailchimp
 sudo update-rc.d mailchimp defaults
 
-sudo service mailchimp restart
+sudo service mailchimp stop
+sudo rm /var/xola/plugins/mailchimp/RUNNING_PID
+sudo service mailchimp start
 
 ###############################################
 # Configure Hostname ans Hosts file
