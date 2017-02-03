@@ -25,10 +25,12 @@ public class ConfigUpdateHelper {
     private final transient Logger.ALogger log = Logger.of(ConfigUpdateHelper.class);
 
     private final InstallationDao installationDao;
+    private final MailchimpKeyVerifier verifier;
 
     @Inject
-    public ConfigUpdateHelper(InstallationDao installationDao) {
+    public ConfigUpdateHelper(InstallationDao installationDao, MailchimpKeyVerifier verifier) {
         this.installationDao = installationDao;
+        this.verifier = verifier;
     }
 
     /**
@@ -44,8 +46,8 @@ public class ConfigUpdateHelper {
             log.debug("Invalid installation id provided: {}", data.getId());
             return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.MISSING_INSTALL_ID)));
         }
-        Optional<Installation> installation = installationDao.getByInstallationId(data.getId());
-        if (!installation.isPresent()) {
+        Optional<Installation> maybeInstallation = installationDao.getByInstallationId(data.getId());
+        if (!maybeInstallation.isPresent()) {
             log.debug("Installation with the given installation id was not found: {}", data.getId());
             return notFound(ErrorUtil.toJson(NOT_FOUND, messages.at(MessageKey.NOT_FOUND)));
         }
@@ -53,9 +55,16 @@ public class ConfigUpdateHelper {
             log.debug("Missing config values");
             badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MessageKey.INVALID_JSON)));
         }
-        Installation confirm = installation.get();
-        confirm.setPreferences(data.getPreferences());
-        WriteResult result = installationDao.insert(confirm);
+        Installation installation = maybeInstallation.get();
+        installation.setPreferences(data.getPreferences());
+
+        Optional<Result> maybeValidationError = verifier.verifyAndCompleteInstallation(installation, messages);
+        if (maybeValidationError.isPresent()) {
+            log.error("Error verifying mailchimp api key.");
+            return maybeValidationError.get();
+        }
+
+        WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
             log.debug("Configuration saved successfully for installation {}", data.getId());
             return ok(messages.at(MessageKey.CONFIG_UPDATED));

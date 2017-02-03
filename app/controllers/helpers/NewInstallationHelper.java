@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
+import play.libs.Json;
 import play.mvc.Result;
 import utils.ErrorUtil;
 import utils.MessageKey;
@@ -15,11 +16,11 @@ import utils.MessageKey;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.INTERNAL_SERVER_ERROR;
-import static play.mvc.Results.badRequest;
-import static play.mvc.Results.internalServerError;
+import static play.mvc.Results.*;
 import static utils.MessageKey.INVALID_JSON;
 import static utils.MessageKey.UNEXPECTED_ERROR;
 
@@ -54,12 +55,19 @@ public class NewInstallationHelper {
             log.debug("Brand new user {}!", data.getUser().getId());
             installation = createInstallationFromData(data);
         }
+
+        Optional<Result> maybeValidationError = verifier.verifyAndCompleteInstallation(installation, messages);
+        if (maybeValidationError.isPresent()) {
+            log.error("Error verifying mailchimp api key.");
+            return maybeValidationError.get();
+        }
+
         WriteResult result = installationDao.insert(installation);
         if (result.wasAcknowledged()) {
             ObjectId installationId = result.getUpsertedId() == null ? installation.getId() : (ObjectId) result.getUpsertedId();
             Installation inst = installationDao.get(installationId);
             log.info("Installation {} updated", inst.getId());
-            return verifier.verifyAndCompleteInstallation(inst, messages);
+            return ok(Json.toJson(inst));
         } else {
             log.error("Error while persisting installation. {}", result.toString());
             return internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
