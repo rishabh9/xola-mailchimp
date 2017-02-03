@@ -76,7 +76,7 @@ public class IncomingDataController extends Controller {
                     log.debug("Installation event received");
                     return complete(executeInstallationEvents(event, json, messages));
                 case Event.PLUGIN_UNINSTALL:
-                    log.warn("Ignoring event {}.", event);
+                    log.debug("Uninstall event received");
                     return complete(ok());
                 default:
                     log.warn("Ignoring event {}.", event);
