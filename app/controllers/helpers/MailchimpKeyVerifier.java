@@ -62,12 +62,12 @@ public class MailchimpKeyVerifier {
             String apiKey = meta[0];
             String dataCentre = meta[1];
             if (StringUtils.hasText(apiKey) && StringUtils.hasText(dataCentre)) {
-                log.info("Verifying API key {} for installation {}", apiKey, installation.getId().toHexString());
+                log.info("Verifying API key {} for installation {}", apiKey, installation.getInstallationId());
                 try {
                     WSResponse response = ws.url(String.format(appConfig.getString(Constants.MAILCHIMP_VERIFY_URL), dataCentre))
                             .setAuth("username", apiKey).get().toCompletableFuture().get();
                     if (response.getStatus() == Http.Status.OK) {
-                        log.info("Mailchimp API key is verified for installation {}", installation.getId().toHexString());
+                        log.info("Mailchimp API key is verified for installation {}", installation.getInstallationId());
                         return Optional.empty();
                     } else {
                         log.info("The provided Mailchimp API key doesn't seems to be valid one. Installation {}",
