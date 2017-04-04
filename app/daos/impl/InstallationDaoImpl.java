@@ -57,13 +57,13 @@ public class InstallationDaoImpl implements InstallationDao {
     }
 
     @Override
-    public WriteResult insert(Installation data) {
-        return installations().save(data);
+    public WriteResult insert(Installation installation) {
+        return installations().insert(installation);
     }
 
     @Override
-    public WriteResult delete(Installation data) {
-        return installations().remove(data.getId());
+    public WriteResult update(Installation installation) {
+        return installations().update(installation.getId()).with(installation);
     }
 
     @Override

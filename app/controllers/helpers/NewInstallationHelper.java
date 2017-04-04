@@ -1,10 +1,11 @@
 package controllers.helpers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 import daos.InstallationDao;
 import models.Installation;
 import models.payload.Data;
-import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 import play.Logger;
 import play.i18n.Messages;
@@ -48,9 +49,11 @@ public class NewInstallationHelper {
             return badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(INVALID_JSON), validationErrors));
         }
         Installation installation = installationDao.getByUserId(data.getUser().getId());
+        boolean isUpdate = false;
         if (null != installation) {
             log.debug("Found an existing entry for user {}", data.getUser().getId());
             copyOverData(data, installation);
+            isUpdate = true;
         } else {
             log.debug("Brand new user {}!", data.getUser().getId());
             installation = createInstallationFromData(data);
@@ -62,16 +65,27 @@ public class NewInstallationHelper {
             return maybeValidationError.get();
         }
 
-        WriteResult result = installationDao.insert(installation);
+        WriteResult result;
+        if (isUpdate) {
+            result = installationDao.update(installation);
+        } else {
+            result = installationDao.insert(installation);
+        }
         if (result.wasAcknowledged()) {
-            ObjectId installationId = result.getUpsertedId() == null ? installation.getId() : (ObjectId) result.getUpsertedId();
-            Installation inst = installationDao.get(installationId);
-            log.info("Installation {} updated", inst.getId());
-            return ok(Json.toJson(inst));
+            log.info("Installation {}: {}", isUpdate ? "updated" : "created", installation.getId());
+            return ok(wrap(installation));
         } else {
             log.error("Error while persisting installation. {}", result.toString());
             return internalServerError(ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(UNEXPECTED_ERROR)));
         }
+    }
+
+    private JsonNode wrap(Installation installation) {
+        ObjectNode node = Json.newObject();
+        node.put("installationId", installation.getInstallationId());
+        node.set("user", Json.toJson(installation.getUser()));
+        node.set("preferences", Json.toJson(installation.getPreferences()));
+        return node;
     }
 
     private Map<String, String> getValidationErrors(Data data, Messages messages) {

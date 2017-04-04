@@ -4,14 +4,14 @@ name := """xola-mailchimp"""
 
 version := (version in ThisBuild).value
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava, DebianPlugin)
+lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
   cache,
   javaWs,
-  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
+  "com.github.rishabh9" %% "play-jongo" % "2.0.1-jongo1.3",
   "org.mockito" % "mockito-core" % "1.10.19" % "test",
   "org.powermock" % "powermock-module-junit4" % "1.6.6" % "test",
   "org.powermock" % "powermock-api-mockito" % "1.6.6" % "test",
@@ -19,8 +19,6 @@ libraryDependencies ++= Seq(
 )
 
 PlayKeys.externalizeResources := false
-
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 initialize := {
   val _ = initialize.value
@@ -34,11 +32,9 @@ sources in (Compile, doc) := Seq.empty
 
 publishArtifact in (Compile, packageDoc) := false
 
-maintainer in Linux := "Rishabh Joshi <rishabh@xola.com>"
-
-packageSummary in Linux := "The Mailchimp Integration for Xola"
-
 packageDescription := "The Mailchimp Integration for Xola"
+
+maintainer := "Rishabh Joshi"
 
 javaOptions in Test += "-Dconfig.file=conf/application-test.conf"
 

@@ -42,12 +42,12 @@ interface GenericDao<T, PK extends ObjectId> {
     WriteResult insert(T object);
 
     /**
-     * Generic method to delete a document.
+     * Generic method to update a document.
      *
-     * @param object the document to delete.
+     * @param object the document to update.
      * @return the result of the operation as a {@link WriteResult} object.
      */
-    WriteResult delete(T object);
+    WriteResult update(T object);
 
     /**
      * Generic method to delete a document.

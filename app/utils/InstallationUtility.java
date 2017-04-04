@@ -20,7 +20,7 @@ public class InstallationUtility {
         Optional<String> value = Optional.empty();
         for (Preference preference : installation.getPreferences()) {
             if (preference.getKey().equals(CONFIG_MC_LIST_ID)) {
-                String label = (String) preference.getValues().get(0).getLabel();
+                String label = preference.getValues().get(0).getId();
                 value = Optional.ofNullable(label);
             }
         }
