@@ -45,9 +45,6 @@ public class MailchimpKeyVerifier {
 
     /**
      * Verify we have all the data and complete installation.
-     *
-     * @param installation
-     * @return
      */
     Optional<Result> verifyAndCompleteInstallation(Installation installation, Messages messages) {
         Map<String, List<Value>> prefsMap = new HashMap<>();
@@ -71,7 +68,7 @@ public class MailchimpKeyVerifier {
                         return Optional.empty();
                     } else {
                         log.info("The provided Mailchimp API key doesn't seems to be valid one. Installation {}",
-                                installation.getId().toHexString());
+                                installation.getInstallationId());
                         return returnMailchimpApiKeyError(messages, MessageKey.MC_API_KEY_INVALID);
                     }
                 } catch (InterruptedException | ExecutionException e) {
@@ -85,7 +82,7 @@ public class MailchimpKeyVerifier {
                 return returnMailchimpApiKeyError(messages, MessageKey.MC_API_KEY_INVALID);
             }
         } else {
-            log.error("Mailchimp API key is null/empty/invalid for installation {}", installation.getId().toHexString());
+            log.error("Mailchimp API key is null/empty/invalid for installation {}", installation.getInstallationId());
             return returnMailchimpApiKeyError(messages, MessageKey.MC_API_KEY_INVALID);
         }
     }

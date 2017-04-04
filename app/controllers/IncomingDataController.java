@@ -123,7 +123,7 @@ public class IncomingDataController extends Controller {
     private String getUrl(Installation installation, String configuredListId) {
         return String.format(
                 config.getString(Constants.MAILCHIMP_ADD_EMAIL_URL),
-                utility.getDataCentre(installation), configuredListId);
+                utility.getDataCentre(installation).get(), configuredListId);
     }
 
     private Result executeInstallationEvents(String event, JsonNode json, Messages messages) {
