@@ -64,7 +64,7 @@ public class ConfigUpdateHelper {
             return maybeValidationError.get();
         }
 
-        WriteResult result = installationDao.insert(installation);
+        WriteResult result = installationDao.update(installation);
         if (result.wasAcknowledged()) {
             log.debug("Configuration saved successfully for installation {}", data.getId());
             return ok(messages.at(MessageKey.CONFIG_UPDATED));
