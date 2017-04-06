@@ -89,10 +89,11 @@ public class IncomingDataController extends Controller {
     }
 
     private CompletionStage<Result> executeOrderEvent(JsonNode json, Messages messages) {
-        String email = json.findPath("customerEmail").textValue();
+        String customerEmail = json.findPath("customerEmail").textValue();
+        String customerName = json.findPath("customerName").textValue();
         String sellerId = json.findPath("seller").findPath("id").textValue();
-        log.debug("To add email {} into mailing list of seller {}", email, sellerId);
-        if (email == null) {
+        log.debug("To add email {} into mailing list of seller {}", customerEmail, sellerId);
+        if (customerEmail == null) {
             log.warn("Incoming data is missing email parameter");
             return complete(badRequest(ErrorUtil.toJson(BAD_REQUEST, messages.at(MISSING_PARAM_EMAIL))));
         } else {
@@ -105,7 +106,8 @@ public class IncomingDataController extends Controller {
                         .setAuth("username", apiKey.get())
                         .setContentType(Http.MimeTypes.JSON);
                 ObjectNode data = Json.newObject();
-                data.put("email_address", email);
+                data.put("email_address", customerEmail);
+                data.set("merge_fields", getFirstAndLastName(customerName));
                 data.put("status", "subscribed");
                 return request.post(data).thenApply(wsResponse -> {
                     JsonNode jsonResponse = wsResponse.asJson();
@@ -118,6 +120,23 @@ public class IncomingDataController extends Controller {
                         ErrorUtil.toJson(INTERNAL_SERVER_ERROR, messages.at(MISSING_CONFIG))));
             }
         }
+    }
+
+    private JsonNode getFirstAndLastName(String customerName) {
+        ObjectNode data = Json.newObject();
+        if (StringUtils.hasText(customerName)) {
+            String[] firstAndLastName = customerName.trim().split(" ");
+            if (firstAndLastName.length == 2) {
+                data.put("FNAME", firstAndLastName[0]);
+                data.put("LNAME", firstAndLastName[1]);
+            } else if (firstAndLastName.length > 2) {
+                data.put("FNAME", firstAndLastName[0]);
+                data.put("LNAME", firstAndLastName[firstAndLastName.length - 1]);
+            } else {
+                data.put("FNAME", customerName);
+            }
+        }
+        return data;
     }
 
     private String getUrl(Installation installation, String configuredListId) {
